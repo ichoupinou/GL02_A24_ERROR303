@@ -1,6 +1,11 @@
 const readline = require('readline');
 const fs = require('fs');
+const DataMain = require('./main.js');
+
+data = DataMain.structuredData
+
 module.exports={askMainMenu, askSearchMenu, displayMainMenu, displaySearchMenu, handleMainMenu, handleSearchMenu};
+
 
 // Créer une interface pour lire et écrire dans la console
 const rl = readline.createInterface({
@@ -8,7 +13,7 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-// Fonction pour afficher le menu
+// Fonction pour afficher le menu principal
 function displayMainMenu() {
     console.log("\nBienvenue dans l'Outil de Gestion et Suivi d'Occupation des Salles de Cours :");
     console.log('Menu Principal');
@@ -32,7 +37,7 @@ function displaySearchMenu() {
     console.log('0 - Quitter');
 }
 
-// Gérer les choix dans le sous-menu
+// Gérer les choix dans le main menu
 function handleMainMenu(choice) {
     switch (choice) {
         case '1':
@@ -42,8 +47,8 @@ function handleMainMenu(choice) {
             EDTCRU();
             return;
         case '3':
-            EDTICalendar();
-            return;
+            generatePersonalSchedule();
+            break;
         case '4':
             Chevauchement();
             return;
@@ -58,15 +63,13 @@ function handleMainMenu(choice) {
             rl.close(); // Fermer l'interface de lecture
             return;
         default:
-            console.log('Option invalide. Veuillez choisir un nombre entre 1 et 3.');
+            console.log('Option invalide. Veuillez choisir un nombre entre 0 et 6.');
     }
-    askSubMenu(); // Revenir au sous-menu après chaque action
 }
 
 //on fait return après une fonction
 
-
-// Gérer les choix dans le menu principal
+// Gérer les choix dans le menu recherche
 function handleSearchMenu(choice) {
     switch (choice) {
         case '1':
@@ -85,16 +88,20 @@ function handleSearchMenu(choice) {
             askMainMenu(); // Revenir au menu principal
             return;
         default:
-            console.log('Option invalide. Veuillez choisir un nombre entre 1 et 3.');
+            console.log('Option invalide. Veuillez choisir un nombre entre 0 et 4.');
     }
-    askMainMenu(); // Revenir au menu principal après chaque action
 }
 
 // Demander une commande dans le menu principal
 function askMainMenu() {
     displayMainMenu();
     rl.question('Votre choix : ', (choice) => {
-        handleMainMenu(choice);
+        try {
+            handleMainMenu(choice); // Ensure this function calls askMainMenu or rl.close
+        } catch (error) {
+            console.error('An error occurred: ', error.message);
+            askMainMenu(); // Prompt again in case of errors
+        }
     });
 }
 
@@ -102,396 +109,232 @@ function askMainMenu() {
 function askSearchMenu() {
     displaySearchMenu();
     rl.question('Votre choix : ', (choice) => {
-        handleSearchMenu(choice);
-    });
-}
-
-//main menu
-function EDTCRU() {
-
-}
-
-function EDTICalendar() {
-
-}
-
-function Chevauchement() {
-
-}
-
-function ClassementCapaciteSalle() {
-
-}
-
-function VisuelOccupationSalle() {
-
-}
-
-//search menu
-function SalleCours() {
-    console.log("\nVous avez choisi l'option 'Recherche des salles assignées à un cours'");
-    console.log("Quel est le cours dont vous recherchez les salles ?");
-    console.log("0 - Quitter");
-    
-    rl.question('Votre choix : ', (choice) => {
-        switch (choice) {
-            case '0': 
-                console.log("\nVous avez choisi l'option 'Quitter'");
-                return; // Quitte la fonction proprement
-            default:
-                console.log(`Vous avez choisi de rechercher les salles pour le cours : ${choice}`);
-                // Ajouter ici le traitement pour rechercher les salles assignées
-                break;
-        }
-    });
-}
-
-
-function CapaciteSalle() {
-
-}
-
-function DisponibiliteSalle() {
-
-}
-
-function CreneauLibreSalle() {
-
-}
-
-//claude a fait la suite
-
-
-// Simulated data structures
-const courses = [
-    { id: 'INFO101', name: 'Introduction to Programming', department: 'Computer Science' },
-    { id: 'MATH202', name: 'Linear Algebra', department: 'Mathematics' },
-    { id: 'PHYS301', name: 'Advanced Physics', department: 'Physics' }
-];
-
-const rooms = [
-    { id: 'A101', capacity: 30, building: 'Science Block' },
-    { id: 'B202', capacity: 50, building: 'Main Building' },
-    { id: 'C303', capacity: 20, building: 'Humanities Block' }
-];
-
-const schedules = [
-    { 
-        courseId: 'INFO101', 
-        roomId: 'A101', 
-        day: 'Monday', 
-        startTime: '09:00', 
-        endTime: '11:00' 
-    },
-    { 
-        courseId: 'MATH202', 
-        roomId: 'B202', 
-        day: 'Tuesday', 
-        startTime: '14:00', 
-        endTime: '16:00' 
-    }
-];
-
-// Existing code remains the same...
-
-function EDTCRU() {
-    console.log("\nGénération de l'EDT au format CRU");
-    console.log("0 - Retour au menu principal");
-    
-    rl.question('Voulez-vous générer un EDT pour un département ou un cours spécifique ? (Département/Cours/0) : ', (input) => {
-        if (input === '0') {
-            askMainMenu();
-            return;
-        }
-        
         try {
-            const filteredSchedules = schedules.filter(schedule => 
-                courses.some(course => 
-                    course.department === input || course.id === input
-                )
-            );
-            
-            if (filteredSchedules.length === 0) {
-                console.log("Aucun emploi du temps trouvé pour ce département ou cours.");
-            } else {
-                console.log("\nEmploi du Temps (Format CRU) :");
-                filteredSchedules.forEach(schedule => {
-                    const course = courses.find(c => c.id === schedule.courseId);
-                    const room = rooms.find(r => r.id === schedule.roomId);
-                    console.log(`Cours: ${course.name} (${course.id})`);
-                    console.log(`Salle: ${room.id} (${room.building})`);
-                    console.log(`Jour: ${schedule.day}`);
-                    console.log(`Horaire: ${schedule.startTime} - ${schedule.endTime}\n`);
-                });
-            }
+            handleSearchMenu(choice); // Ensure this function calls askMainMenu or rl.close
         } catch (error) {
-            console.log("Une erreur s'est produite lors de la génération de l'EDT.");
+            console.error('An error occurred: ', error.message);
+            askSearchMenu(); // Prompt again in case of errors
         }
-        
-        askMainMenu();
     });
 }
 
-function EDTICalendar() {
-    console.log("\nGénération de l'EDT en ICalendar");
-    console.log("0 - Retour au menu principal");
-    
-    rl.question('Entrez votre nom ou identifiant : ', (input) => {
-        if (input === '0') {
-            askMainMenu();
-            return;
-        }
-        
-        try {
-            const personalSchedule = schedules.filter(schedule => 
-                courses.some(course => course.id.includes(input))
-            );
-            
-            if (personalSchedule.length === 0) {
-                console.log("Aucun emploi du temps trouvé.");
-            } else {
-                const icalContent = personalSchedule.map(schedule => {
-                    const course = courses.find(c => c.id === schedule.courseId);
-                    const room = rooms.find(r => r.id === schedule.roomId);
-                    return `BEGIN:VEVENT
-SUMMARY:${course.name}
-LOCATION:${room.id}
-DTSTART:2024-01-01T${schedule.startTime}:00
-DTEND:2024-01-01T${schedule.endTime}:00
-END:VEVENT`;
-                }).join('\n');
-                
-                const filename = `EDT_${input}.ics`;
-                fs.writeFileSync(filename, `BEGIN:VCALENDAR\n${icalContent}\nEND:VCALENDAR`);
-                console.log(`Fichier ICalendar généré : ${filename}`);
-            }
-        } catch (error) {
-            console.log("Une erreur s'est produite lors de la génération du calendrier.");
-        }
-        
-        askMainMenu();
-    });
+// Check if the course exists in data
+function findCourse(courseCode) {
+    return data.some(module => module.module === courseCode);
 }
 
-function Chevauchement() {
-    console.log("\nVérification du non-chevauchement des cours");
-    console.log("0 - Retour au menu principal");
-    
-    const checkOverlap = (schedule1, schedule2) => {
-        return schedule1.day === schedule2.day && 
-               !(schedule1.endTime <= schedule2.startTime || 
-                 schedule1.startTime >= schedule2.endTime);
+function convertToISODateTime(day, time) {
+    // Map of days to their corresponding date in 2024
+    const dayMap = {
+        'Monday': '20240108',    // First Monday of 2024
+        'Tuesday': '20240109',   // First Tuesday of 2024
+        'Wednesday': '20240110', // First Wednesday of 2024
+        'Thursday': '20240111',  // First Thursday of 2024
+        'Friday': '20240112'     // First Friday of 2024
     };
-    
-    const overlappingCourses = schedules.filter((schedule, index) => 
-        schedules.some((otherSchedule, otherIndex) => 
-            index !== otherIndex && checkOverlap(schedule, otherSchedule)
-        )
-    );
-    
-    if (overlappingCourses.length === 0) {
-        console.log("Aucun chevauchement de cours détecté.");
-    } else {
-        console.log("Cours en chevauchement détectés :");
-        overlappingCourses.forEach(schedule => {
-            const course = courses.find(c => c.id === schedule.courseId);
-            const room = rooms.find(r => r.id === schedule.roomId);
-            console.log(`Cours: ${course.name} (${course.id})`);
-            console.log(`Salle: ${room.id}`);
-            console.log(`Jour: ${schedule.day}`);
-            console.log(`Horaire: ${schedule.startTime} - ${schedule.endTime}\n`);
-        });
+
+    // If day not found, default to Monday
+    const datePrefix = dayMap[day] || '20240108';
+
+    // Directly use time, adding seconds
+    const formattedTime = time.replace(':', '') + '00';
+
+    return `${datePrefix}T${formattedTime}`;
+}
+
+function generateICalendar(dict_courses_selected) {
+    // Start of the iCalendar file
+    let icsContent = "BEGIN:VCALENDAR\n";
+    icsContent += "VERSION:2.0\n";
+    icsContent += "PRODID:-//Custom Classroom Schedule//EN\n";
+
+    // Mapping of abbreviated days to full day names
+    const dayMap = {
+        'L': 'Monday',
+        'MA': 'Tuesday',
+        'ME': 'Wednesday',
+        'J': 'Thursday',
+        'V': 'Friday',
+        'S': 'Saturday'
+    };
+
+    // Iterate through each course in the selected courses
+    for (let course in dict_courses_selected) {
+        // Handle both single class and object of classes
+        const classData = dict_courses_selected[course];
+        
+        // Ensure we have a valid class object
+        if (!classData || !classData.classes) {
+            console.warn(`Skipping invalid class for ${course}`);
+            continue;
+        }
+
+        // Normalize the class data to ensure it's always an object
+        const cls = classData.classes;
+
+        // Ensure we have required class properties
+        if (!cls.day || !cls.start || !cls.end || !cls.room) {
+            console.warn(`Skipping incomplete class for ${course}`);
+            continue;
+        }
+
+        // Convert abbreviated day to full day name
+        const fullDay = dayMap[cls.day] || cls.day;
+
+        // Generate a unique identifier for the event
+        const uid = `${course}-${cls.group}-${cls.day}-${cls.start}`;
+
+        // Convert date to ISO format (assuming 2024 as default year)
+        const startDateTime = convertToISODateTime(fullDay, cls.start);
+        const endDateTime = convertToISODateTime(fullDay, cls.end);
+
+        // Add event to iCalendar
+        icsContent += "BEGIN:VEVENT\n";
+        icsContent += `UID:${uid}\n`;
+        icsContent += `SUMMARY:${course} - ${cls.group || 'Class'}\n`;
+        icsContent += `DTSTART:${startDateTime}\n`;
+        icsContent += `DTEND:${endDateTime}\n`;
+        icsContent += `LOCATION:${cls.room}\n`;
+        icsContent += "END:VEVENT\n";
     }
-    
+
+    // Close the iCalendar file
+    icsContent += "END:VCALENDAR";
+
+    // Write to file
+    const fileName = 'personal_schedule.ics';
+    try {
+        fs.writeFileSync(fileName, icsContent, 'utf8');
+        console.log(`iCalendar file generated: ${fileName}`);
+    } catch (error) {
+        console.error('Error writing iCalendar file:', error);
+    }
+
+    // Return to main menu
     askMainMenu();
 }
 
-function ClassementCapaciteSalle() {
-    console.log("\nClassement des salles par capacité");
-    
-    const sortedRooms = [...rooms].sort((a, b) => b.capacity - a.capacity);
-    
-    console.log("Salles classées par capacité décroissante :");
-    sortedRooms.forEach((room, index) => {
-        console.log(`${index + 1}. Salle ${room.id}: ${room.capacity} places (${room.building})`);
-    });
-    
-    askMainMenu();
-}
+// Function to ask for a course and handle the logic
+// Function to ask for courses and handle the logic
+function askForCourses() {
+    const list_courses = [];
 
-function VisuelOccupationSalle() {
-    console.log("\nTaux d'occupation des salles");
-    
-    rooms.forEach(room => {
-        const roomSchedules = schedules.filter(schedule => schedule.roomId === room.id);
-        const occupiedHours = roomSchedules.reduce((total, schedule) => {
-            const start = new Date(`2024-01-01T${schedule.startTime}`);
-            const end = new Date(`2024-01-01T${schedule.endTime}`);
-            return total + (end - start) / (1000 * 60 * 60);
-        }, 0);
-        
-        const totalWeeklyHours = 40; // Assuming 40-hour work week
-        const occupationRate = (occupiedHours / totalWeeklyHours * 100).toFixed(2);
-        
-        console.log(`Salle ${room.id}: ${occupationRate}% occupée`);
-    });
-    
-    askMainMenu();
-}
-
-function SalleCours() {
-    console.log("\nRecherche des salles assignées à un cours");
-    console.log("0 - Retour au menu précédent");
-    
-    rl.question('Entrez le code ou le nom du cours : ', (input) => {
-        if (input === '0') {
-            askSearchMenu();
-            return;
-        }
-        
-        const matchingCourses = courses.filter(course => 
-            course.id.toLowerCase().includes(input.toLowerCase()) || 
-            course.name.toLowerCase().includes(input.toLowerCase())
-        );
-        
-        if (matchingCourses.length === 0) {
-            console.log("Aucun cours trouvé.");
-        } else {
-            matchingCourses.forEach(course => {
-                const courseSchedules = schedules.filter(schedule => schedule.courseId === course.id);
-                console.log(`\nCours: ${course.name} (${course.id})`);
-                
-                if (courseSchedules.length === 0) {
-                    console.log("Aucune salle assignée.");
-                } else {
-                    courseSchedules.forEach(schedule => {
-                        const room = rooms.find(r => r.id === schedule.roomId);
-                        console.log(`Salle: ${room.id} (${room.building})`);
-                        console.log(`Jour: ${schedule.day}`);
-                        console.log(`Horaire: ${schedule.startTime} - ${schedule.endTime}`);
-                    });
-                }
-            });
-        }
-        
-        askSearchMenu();
-    });
-}
-
-function CapaciteSalle() {
-    console.log("\nRecherche de la capacité maximale d'une salle");
-    console.log("0 - Retour au menu précédent");
-    
-    rl.question('Entrez le numéro ou l\'identifiant de la salle : ', (input) => {
-        if (input === '0') {
-            askSearchMenu();
-            return;
-        }
-        
-        const room = rooms.find(r => 
-            r.id.toLowerCase() === input.toLowerCase()
-        );
-        
-        if (room) {
-            console.log(`\nSalle ${room.id}`);
-            console.log(`Bâtiment: ${room.building}`);
-            console.log(`Capacité maximale: ${room.capacity} places`);
-        } else {
-            console.log("Salle non trouvée.");
-        }
-        
-        askSearchMenu();
-    });
-}
-
-function DisponibiliteSalle() {
-    console.log("\nRecherche des disponibilités d'une salle");
-    console.log("0 - Retour au menu précédent");
-    
-    rl.question('Entrez le numéro ou l\'identifiant de la salle : ', (salle) => {
-        if (salle === '0') {
-            askSearchMenu();
-            return;
-        }
-        
-        const room = rooms.find(r => r.id.toLowerCase() === salle.toLowerCase());
-        
-        if (!room) {
-            console.log("Salle non trouvée.");
-            askSearchMenu();
-            return;
-        }
-        
-        rl.question('Entrez le jour (ex: Monday) : ', (jour) => {
-            if (jour === '0') {
-                askSearchMenu();
-                return;
-            }
-            
-            const roomSchedules = schedules.filter(schedule => 
-                schedule.roomId === room.id && schedule.day === jour
-            );
-            
-            if (roomSchedules.length === 0) {
-                console.log(`La salle ${room.id} est entièrement disponible le ${jour}.`);
-            } else {
-                console.log(`Créneaux occupés pour la salle ${room.id} le ${jour} :`);
-                roomSchedules.forEach(schedule => {
-                    const course = courses.find(c => c.id === schedule.courseId);
-                    console.log(`Cours: ${course.name}`);
-                    console.log(`Horaire: ${schedule.startTime} - ${schedule.endTime}\n`);
-                });
-            }
-            
-            askSearchMenu();
-        });
-    });
-}
-
-function CreneauLibreSalle() {
-    console.log("\nRecherche des salles libres à un créneau");
-    console.log("0 - Retour au menu précédent");
-    
-    rl.question('Entrez le jour (ex: Monday) : ', (jour) => {
-        if (jour === '0') {
-            askSearchMenu();
-            return;
-        }
-        
-        rl.question('Entrez l\'heure de début (HH:MM) : ', (heureDebut) => {
-            if (heureDebut === '0') {
-                askSearchMenu();
-                return;
-            }
-            
-            rl.question('Entrez l\'heure de fin (HH:MM) : ', (heureFin) => {
-                if (heureFin === '0') {
-                    askSearchMenu();
+    function ask() {
+        rl.question("Donnez le nom d'un cours ('0' pour quitter, '1' pour terminer la sélection): ", (input) => {
+            switch (input) {
+                case '0':
+                    console.log("Vous avez choisi de quitter");
+                    askMainMenu();
                     return;
-                }
-                
-                const availableRooms = rooms.filter(room => 
-                    !schedules.some(schedule => 
-                        schedule.roomId === room.id && 
-                        schedule.day === jour && 
-                        !(heureFin <= schedule.startTime || 
-                          heureDebut >= schedule.endTime)
-                    )
-                );
-                
-                if (availableRooms.length === 0) {
-                    console.log("Aucune salle disponible sur ce créneau.");
-                } else {
-                    console.log("Salles disponibles :");
-                    availableRooms.forEach(room => {
-                        console.log(`${room.id} (${room.building}, ${room.capacity} places)`);
-                    });
-                }
-                
-                askSearchMenu();
-            });
+                case '1':
+                    if (list_courses.length > 0) {
+                        console.log('Choix du groupe de cours');
+                        askForGroups(list_courses);
+                    } else {
+                        console.log('Pas de cours choisis, veuillez réessayer');
+                    }
+                    return;
+                default:
+                    if (findCourse(input) == true) {
+                        console.log(`Course added: ${input}`);
+                        list_courses.push(input);
+                    } else {
+                        console.log('Course not found. Please try again.');
+                    }
+
+                    ask(); // Repeat for the next course
+            }
         });
-    });
+    };
+
+    ask(); // Start the loop
 }
 
-// Rest of the existing code remains the same
+// Function to ask for a course and handle the logic
+// Function to ask for courses and handle the logic
+function askForGroups(list_courses) {
+    dict_courses_selected = {}
+    for (let course of list_courses) {
+        dict_courses_selected[course] = [];  // Use course as the key
+    }
+
+    for (let course of Object.keys(dict_courses_selected)) {
+        console.log(`Choix pour le cours ${course}`)
+    
+        PrintGroupsAvailable(course)
+
+        function ask() {
+            rl.question("Donnez le nom de votre groupe de cours pour ('0' pour quitter, '1' pour terminer la sélection): ", (input) => {
+                switch (input) {
+                    case '0':
+                        console.log("Vous avez choisi de quitter");
+                        askMainMenu();
+                        return;
+                    case '1':
+                        if (list_courses.length > 0) {
+                            console.log('Géneration fichier iCalendar pour les cours choisis...');
+                            generateICalendar(dict_courses_selected);
+                        } else {
+                            console.log('Pas de groupes choisis, veuillez réessayer');
+                        }
+                        return;
+                    default:
+                        if (findGroup(input) == true) {
+                            console.log(`Groupe ajouté: ${input}`);
+                            dict_courses_selected[course] = findGroupModule(input);
+                        } else {
+                            console.log('Group not found. Please try again.');
+                        }
+
+                        ask(); // Repeat for the next course
+                }
+            });
+        };
+
+        ask(); // Start the loop
+    }
+}
+
+function PrintGroupsAvailable(CourseCode) {
+    // Find the specific module in the data array
+    const moduleData = data.find(module => module.module === CourseCode);
+    
+    if (moduleData && Array.isArray(moduleData.classes) && moduleData.classes.length > 0) {
+        console.log(`Groupes possible pour cours ${CourseCode}:`);
+        // Iterate over the groups (entries) for this course
+        moduleData.classes.forEach(group => {
+            console.log(`Groupe: ${group.group}, Jour: ${group.day}, Heures: ${group.start}-${group.end}, Salle: ${group.room}`);
+        });
+    } else {
+        console.log(`No groups available for course ${CourseCode}.`);
+    }
+}
+
+function findGroup(groupCode) {
+    return data.some(module => 
+        module.classes.some(classGroup => classGroup.group === groupCode)
+    );
+}
+
+function findGroupModule(groupCode) {
+    // Iterate through all modules
+    for (const module of data) {
+        // Check if the module has classes and look for a matching group
+        if (module.classes && Array.isArray(module.classes)) {
+            const group = module.classes.find(entry => entry.group === groupCode);
+            if (group) {
+                return {
+                    module: module.module,
+                    classes: group
+                };
+            }
+        }
+    }
+}
+   
+
+// Entry point
+function generatePersonalSchedule() {
+    console.log('Welcome to the iCalendar generation tool');
+    askForCourses();
+}

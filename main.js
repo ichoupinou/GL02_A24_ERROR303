@@ -2,72 +2,86 @@ const Parser = require('./parser.js');
 const fs = require('fs');
 const path = require('path');
 const file = path.resolve(__dirname, './sample/edt.cru');
-//const structuredData=null;
-
-// Lancer l'application
-const Menu = require('./terminalcommande.js');
-Menu.askMainMenu();
+let structuredData = null;
 
 // Lecture du fichier
 fs.readFile(file, 'utf8', async (err, data) => {
-    if (err) throw err;
+    if (err) {
+        console.error("Erreur lors de la lecture du fichier :", err);
+        return;
+    }
 
     // Créer une nouvelle instance de Parser
     const parser = new Parser();
 
     console.log("Validation et tokenisation en cours...");
 
-    // Parse et récupère les tokens structurés
-    const tokens = await parser.parseAndTokenize(data);
+    try {
+        // Parse et récupère les tokens structurés
+        const tokens = await parser.parseAndTokenize(data);
 
-    if (tokens) {
-        console.log(`Le fichier ${file} est conforme au format CRU.`);
-        //console.log("Données en tokens : ", tokens);
+        if (tokens) {
+            console.log(`Le fichier ${file} est conforme au format CRU.`);
 
-        // Organisation des données
-        structuredData = organizeTokensbis(tokens);
-        //console.log("Données structurées : ");
-        //console.log(JSON.stringify(structuredData, null, 2));
-    } else {
-        console.log(`Le fichier ${file} n'est pas conforme au format CRU.`);
-}
+            // Organisation des données
+            structuredData = organizeTokensbis(tokens);
+            
+            // Export the structured data
+            module.exports = { structuredData };
+            
+            console.log("Structured Data: ");
+            console.log(JSON.stringify(structuredData, null, 2));
+
+            // Lancer l'application APRES le traitement du fichier
+            const Menu = require('./terminalcommande.js');
+            Menu.askMainMenu();
+
+        } else {
+            console.log(`Le fichier ${file} n'est pas conforme au format CRU.`);
+        }
+    } catch (parseError) {
+        console.error("Erreur lors du parsing :", parseError);
+    }
 });
-console.log("Données structurées : ");
-console.log(JSON.stringify(structuredData, null, 2));
 
 /**
- * Organise les tokens en une structure de données.
- * Exemple de structure : tableau d'objets représentant des lignes de cours.
+ * tableau d'objets représentant des lignes de cours en données organisées
+ * Exemple de structure : données organisées par cours avec leurs attributs
  *
  * @param {Array<string>} tokens - Les tokens à organiser.
  * @returns {Array<Object>} Données organisées.
  */
-function organizeTokens(tokens) {
-    const organized = [];
-    let currentModule = null;
-
-    for (const token of tokens) {
-        if (/^\+[A-Z]{2,4}(\d{1,2})?[A-Z]?\d?$/.test(token)) {
-            // Détection d'un module
-            currentModule = {
-                module: token,
-                entries: [],
+function transformStructuredDataToClasses(data) {
+    return data.map(module => {
+        const classes = module.entries.map(entry => {
+            return {
+                group: entry[1],      // C1, D1, T1
+                capacity: entry[2],  // 63, 24
+                day: entry[3],       // L, MA, ME
+                start: entry[4],     // 10:00
+                end: entry[5],       // 12:00
+                room: entry[6]       // A002, S102
             };
-            organized.push(currentModule);
-        } else if (currentModule) {
-            // Ajout des entrées au module courant
-            currentModule.entries.push(token);
-        }
-    }
+        });
 
-    return organized;
+        return {
+            module: module.module,  // +MA02
+            classes: classes        // Array de dictionnaires
+        };
+    });
 }
 
+/**
+ * Organise les tokens en une structure de données.
+ * Exemple de structure : Données organisées par cours avec leurs attributs
+ *
+ * @param {Array<string>} tokens - Les tokens à organiser.
+ * @returns {Array<Object>} Données organisées.
+ */
 function organizeTokensbis(tokens) {
     const organized = [];
     let currentModule = null;
     let currentCourse = [];
-    console.log(tokens);
     for (const token of tokens) {
         if (/^\+[A-Z]{2,4}(\d{1,2})?[A-Z]?\d?$/.test(token)) {
             // Détection d'un nouveau module
@@ -81,14 +95,24 @@ function organizeTokensbis(tokens) {
             }
             // Initialiser un nouveau module
             currentModule = {
-                module: token,
+                module: token.slice(1),
                 entries: [], // Un tableau à double entrée (chaque sous-tableau représente un cours)
             };
         } else if (currentModule) {
             // Ajouter le token au cours courant
             if (/^1$|^(C|D|T)\d{1,2}$|^P=\d{1,3}$|^H=(L|MA|ME|J|V|S)$|^(\d|1\d|2[0-3]):[0-5]\d-(\d|1\d|2[0-3]):[0-5][0-9]$|^[A-Z]([0-9]|[A-Z])?$|^S=[A-Z]{1,3}\d{1,3}$/.test(token)) {
                 // Transformer les valeurs spécifiques
-                if (/^P=\d{1,3}$/.test(token)) {
+                if (/^[CTD]\d{1,2}$/.test(token)) {
+                    // Replace C1 -> CM1, T1 -> TP1, D1 -> TD1 dynamically
+                    const transformedToken = token.replace(/^([CTD])(\d+)$/, (match, letter, number) => {
+                        // Dynamically add the appropriate letter (CM, TP, TD)
+                        if (letter === 'C') return 'CM' + number;
+                        if (letter === 'T') return 'TP' + number;
+                        if (letter === 'D') return 'TD' + number;
+                        return match;  // If no match, return the original token
+                    });
+                    currentCourse.push(transformedToken);  // Add the transformed token
+                } else if (/^P=\d{1,3}$/.test(token)) {
                     currentCourse.push(parseInt(token.split("=")[1])); // "P=50" -> 50 (int)
                 } else if (/^H=(L|MA|ME|J|V|S)$/.test(token)) {
                     currentCourse.push(token.split("=")[1]); // "H=MA" -> "MA"
@@ -100,7 +124,10 @@ function organizeTokensbis(tokens) {
                 } else {
                     currentCourse.push(token); // Ajout brut pour les autres tokens
                 }
+            } else if (/^\+[A-Z]{2,4}(\d{1,2})?[A-Z]?\d?$/.test(token)) {
+                currentCourse.push(token.slice(1)); //"+MA02" -> "MA02"
             }
+
             // Si le token de fin de cours est atteint
             if (token === "//") {
                 currentModule.entries.push(currentCourse);
@@ -117,5 +144,8 @@ function organizeTokensbis(tokens) {
         organized.push(currentModule);
     }
 
-    return organized;
+
+    structuredData = transformStructuredDataToClasses(organized)
+
+    return structuredData;
 }
