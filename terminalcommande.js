@@ -1,19 +1,22 @@
 const readline = require('readline');
 const fs = require('fs');
+
 const DataMain = require('./main.js');
+data = DataMain.structuredData  
 
-data = DataMain.structuredData
+module.exports={askMainMenu, askSearchMenu, displayMainMenu, displaySearchMenu, handleMainMenu, handleSearchMenu, findGroup, findCourse};
 
-module.exports={askMainMenu, askSearchMenu, displayMainMenu, displaySearchMenu, handleMainMenu, handleSearchMenu};
-
-
-// Créer une interface pour lire et écrire dans la console
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 
-// Fonction pour afficher le menu principal
+/**
+ * Affiche le menu principal dans la console pour l'outil de gestion et suivi d'occupation des salles de cours.
+ *
+ * @function displayMainMenu
+ * @returns {void} Pas de valeur de retour
+ */
 function displayMainMenu() {
     console.log("\nBienvenue dans l'Outil de Gestion et Suivi d'Occupation des Salles de Cours :");
     console.log('Menu Principal');
@@ -27,6 +30,12 @@ function displayMainMenu() {
     console.log('0 - Quitter');
 }
 
+/**
+ * Affiche le menu de recherche dans la console pour l'outil de gestion
+ * 
+ * @function displaySearchMenu
+ * @returns {void} Pas de valeur de retour.
+ */
 function displaySearchMenu() {
     console.log('\nMenu de recherche');
     console.log('Choisissez une option de recherche :');
@@ -37,11 +46,17 @@ function displaySearchMenu() {
     console.log('0 - Quitter');
 }
 
-// Gérer les choix dans le main menu
+/**
+ * Gère la sélection du menu principal en fonction du choix de l'utilisateur.
+ *
+ * @function handleMainMenu
+ * @param {string} choice - Le choix de l'utilisateur sous forme de chaîne de caractères.
+ * @returns {void} Pas de valeur de retour à part un print à l'user.
+ */
 function handleMainMenu(choice) {
     switch (choice) {
         case '1':
-            askSearchMenu(); // Aller au sous-menu
+            askSearchMenu(); // Aller au sous-menu de recherche
             return;
         case '2':
             EDTCRU();
@@ -67,9 +82,13 @@ function handleMainMenu(choice) {
     }
 }
 
-//on fait return après une fonction
-
-// Gérer les choix dans le menu recherche
+/**
+ * Gère la sélection du menu recherche en fonction du choix de l'utilisateur.
+ *
+ * @function handleSearchMenu
+ * @param {string} choice - Le choix de l'utilisateur sous forme de chaîne de caractères.
+ * @returns {void} Pas de valeur de retour à part un print à l'user.
+ */
 function handleSearchMenu(choice) {
     switch (choice) {
         case '1':
@@ -92,249 +111,68 @@ function handleSearchMenu(choice) {
     }
 }
 
-// Demander une commande dans le menu principal
+/**
+ * Affiche le menu principal et gère l'interaction avec l'utilisateur.
+ *
+ * @function askMainMenu
+ * @returns {void} Pas de valeur de retour.
+ */
 function askMainMenu() {
     displayMainMenu();
     rl.question('Votre choix : ', (choice) => {
         try {
-            handleMainMenu(choice); // Ensure this function calls askMainMenu or rl.close
+            handleMainMenu(choice);
         } catch (error) {
             console.error('An error occurred: ', error.message);
-            askMainMenu(); // Prompt again in case of errors
+            askMainMenu(); // on redemande si erreur
         }
     });
 }
 
-// Demander une commande dans le sous-menu
+/**
+ * Affiche le menu recherche et gère l'interaction avec l'utilisateur.
+ *
+ * @function askSearchMenu
+ * @returns {void} Pas de valeur de retour.
+ */
 function askSearchMenu() {
     displaySearchMenu();
     rl.question('Votre choix : ', (choice) => {
         try {
-            handleSearchMenu(choice); // Ensure this function calls askMainMenu or rl.close
+            handleSearchMenu(choice);
         } catch (error) {
             console.error('An error occurred: ', error.message);
-            askSearchMenu(); // Prompt again in case of errors
+            askSearchMenu();  // on redemande si erreur
         }
     });
 }
 
-// Check if the course exists in data
+//fonctions générales qui peuvent être utilisé dans plusieurs SPEC
+
+
+/**
+ * Vérifie si un cours correspondant au code donné existe dans les données.
+ *
+ * @function findCourse
+ * @param {string} courseCode - Le code du cours à rechercher.
+ * @returns {boolean} `true` si un module correspondant est trouvé, sinon `false`.
+ */
 function findCourse(courseCode) {
     return data.some(module => module.module === courseCode);
 }
 
-function convertToISODateTime(day, time) {
-    // Map of days to their corresponding date in 2024
-    const dayMap = {
-        'Monday': '20240108',    // First Monday of 2024
-        'Tuesday': '20240109',   // First Tuesday of 2024
-        'Wednesday': '20240110', // First Wednesday of 2024
-        'Thursday': '20240111',  // First Thursday of 2024
-        'Friday': '20240112'     // First Friday of 2024
-    };
-
-    // If day not found, default to Monday
-    const datePrefix = dayMap[day] || '20240108';
-
-    // Directly use time, adding seconds
-    const formattedTime = time.replace(':', '') + '00';
-
-    return `${datePrefix}T${formattedTime}`;
-}
-
-function generateICalendar(dict_courses_selected) {
-    // Start of the iCalendar file
-    let icsContent = "BEGIN:VCALENDAR\n";
-    icsContent += "VERSION:2.0\n";
-    icsContent += "PRODID:-//Custom Classroom Schedule//EN\n";
-
-    // Mapping of abbreviated days to full day names
-    const dayMap = {
-        'L': 'Monday',
-        'MA': 'Tuesday',
-        'ME': 'Wednesday',
-        'J': 'Thursday',
-        'V': 'Friday',
-        'S': 'Saturday'
-    };
-
-    // Iterate through each course in the selected courses
-    for (let course in dict_courses_selected) {
-        // Handle both single class and object of classes
-        const classData = dict_courses_selected[course];
-        
-        // Ensure we have a valid class object
-        if (!classData || !classData.classes) {
-            console.warn(`Skipping invalid class for ${course}`);
-            continue;
-        }
-
-        // Normalize the class data to ensure it's always an object
-        const cls = classData.classes;
-
-        // Ensure we have required class properties
-        if (!cls.day || !cls.start || !cls.end || !cls.room) {
-            console.warn(`Skipping incomplete class for ${course}`);
-            continue;
-        }
-
-        // Convert abbreviated day to full day name
-        const fullDay = dayMap[cls.day] || cls.day;
-
-        // Generate a unique identifier for the event
-        const uid = `${course}-${cls.group}-${cls.day}-${cls.start}`;
-
-        // Convert date to ISO format (assuming 2024 as default year)
-        const startDateTime = convertToISODateTime(fullDay, cls.start);
-        const endDateTime = convertToISODateTime(fullDay, cls.end);
-
-        // Add event to iCalendar
-        icsContent += "BEGIN:VEVENT\n";
-        icsContent += `UID:${uid}\n`;
-        icsContent += `SUMMARY:${course} - ${cls.group || 'Class'}\n`;
-        icsContent += `DTSTART:${startDateTime}\n`;
-        icsContent += `DTEND:${endDateTime}\n`;
-        icsContent += `LOCATION:${cls.room}\n`;
-        icsContent += "END:VEVENT\n";
-    }
-
-    // Close the iCalendar file
-    icsContent += "END:VCALENDAR";
-
-    // Write to file
-    const fileName = 'personal_schedule.ics';
-    try {
-        fs.writeFileSync(fileName, icsContent, 'utf8');
-        console.log(`iCalendar file generated: ${fileName}`);
-    } catch (error) {
-        console.error('Error writing iCalendar file:', error);
-    }
-
-    // Return to main menu
-    askMainMenu();
-}
-
-// Function to ask for a course and handle the logic
-// Function to ask for courses and handle the logic
-function askForCourses() {
-    const list_courses = [];
-
-    function ask() {
-        rl.question("Donnez le nom d'un cours ('0' pour quitter, '1' pour terminer la sélection): ", (input) => {
-            switch (input) {
-                case '0':
-                    console.log("Vous avez choisi de quitter");
-                    askMainMenu();
-                    return;
-                case '1':
-                    if (list_courses.length > 0) {
-                        console.log('Choix du groupe de cours');
-                        askForGroups(list_courses);
-                    } else {
-                        console.log('Pas de cours choisis, veuillez réessayer');
-                    }
-                    return;
-                default:
-                    if (findCourse(input) == true) {
-                        console.log(`Course added: ${input}`);
-                        list_courses.push(input);
-                    } else {
-                        console.log('Course not found. Please try again.');
-                    }
-
-                    ask(); // Repeat for the next course
-            }
-        });
-    };
-
-    ask(); // Start the loop
-}
-
-// Function to ask for a course and handle the logic
-// Function to ask for courses and handle the logic
-function askForGroups(list_courses) {
-    dict_courses_selected = {}
-    for (let course of list_courses) {
-        dict_courses_selected[course] = [];  // Use course as the key
-    }
-
-    for (let course of Object.keys(dict_courses_selected)) {
-        console.log(`Choix pour le cours ${course}`)
-    
-        PrintGroupsAvailable(course)
-
-        function ask() {
-            rl.question("Donnez le nom de votre groupe de cours pour ('0' pour quitter, '1' pour terminer la sélection): ", (input) => {
-                switch (input) {
-                    case '0':
-                        console.log("Vous avez choisi de quitter");
-                        askMainMenu();
-                        return;
-                    case '1':
-                        if (list_courses.length > 0) {
-                            console.log('Géneration fichier iCalendar pour les cours choisis...');
-                            generateICalendar(dict_courses_selected);
-                        } else {
-                            console.log('Pas de groupes choisis, veuillez réessayer');
-                        }
-                        return;
-                    default:
-                        if (findGroup(input) == true) {
-                            console.log(`Groupe ajouté: ${input}`);
-                            dict_courses_selected[course] = findGroupModule(input);
-                        } else {
-                            console.log('Group not found. Please try again.');
-                        }
-
-                        ask(); // Repeat for the next course
-                }
-            });
-        };
-
-        ask(); // Start the loop
-    }
-}
-
-function PrintGroupsAvailable(CourseCode) {
-    // Find the specific module in the data array
-    const moduleData = data.find(module => module.module === CourseCode);
-    
-    if (moduleData && Array.isArray(moduleData.classes) && moduleData.classes.length > 0) {
-        console.log(`Groupes possible pour cours ${CourseCode}:`);
-        // Iterate over the groups (entries) for this course
-        moduleData.classes.forEach(group => {
-            console.log(`Groupe: ${group.group}, Jour: ${group.day}, Heures: ${group.start}-${group.end}, Salle: ${group.room}`);
-        });
-    } else {
-        console.log(`No groups available for course ${CourseCode}.`);
-    }
-}
-
+/**
+ * Vérifie si un groupe spécifique existe dans les données.
+ * 
+ * Cette fonction recherche un groupe donné (par son code) dans les modules. Elle retourne `true` si le groupe est trouvé, sinon elle retourne `false`.
+ *
+ * @param {string} groupCode - Le code du groupe à rechercher.
+ * @returns {boolean} Retourne `true` si le groupe existe, sinon `false`.
+ */
 function findGroup(groupCode) {
     return data.some(module => 
         module.classes.some(classGroup => classGroup.group === groupCode)
     );
 }
 
-function findGroupModule(groupCode) {
-    // Iterate through all modules
-    for (const module of data) {
-        // Check if the module has classes and look for a matching group
-        if (module.classes && Array.isArray(module.classes)) {
-            const group = module.classes.find(entry => entry.group === groupCode);
-            if (group) {
-                return {
-                    module: module.module,
-                    classes: group
-                };
-            }
-        }
-    }
-}
-   
 
-// Entry point
-function generatePersonalSchedule() {
-    console.log('Welcome to the iCalendar generation tool');
-    askForCourses();
-}
