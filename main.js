@@ -1,41 +1,33 @@
 const Parser = require('./parser.js');
 const fs = require('fs');
 const path = require('path');
-const file = path.resolve(__dirname, 'sample/edttotal_Projet.cru');
+const file = path.resolve(__dirname, 'sample/edttotal_clean.cru');
 let structuredData = null;
 
-// Lecture du fichier
 fs.readFile(file, 'utf8', async (err, data) => {
     if (err) {
         console.error("Erreur lors de la lecture du fichier :", err);
         return;
     }
 
-    // Créer une nouvelle instance de Parser
     const parser = new Parser();
 
-    console.log("Validation et tokenisation en cours...");
-
     try {
-        // Parse et récupère les tokens structurés
+        console.log("Validation et tokenisation en cours...");
         const tokens = await parser.parseAndTokenize(data);
 
         if (tokens) {
             console.log(`Le fichier ${file} est conforme au format CRU.`);
 
-            // Organisation des données
             structuredData = organizeTokens(tokens);
             
-            // Export the structured data
             module.exports = { structuredData };
             
             console.log("Structured Data: ");
             console.log(JSON.stringify(structuredData, null, 2));
 
-            // Lancer l'application APRES le traitement du fichier
             const Menu = require('./terminalcommande.js');
             Menu.askMainMenu();
-
         } else {
             console.log(`Le fichier ${file} n'est pas conforme au format CRU.`);
         }
@@ -85,7 +77,7 @@ function organizeTokens(tokens) {
     let currentModule = null;
     let currentCourse = [];
     for (const token of tokens) {
-        if (/^\+[A-Z]{2,4}(\d{1,2})?[A-Z]?\d?$/.test(token)) {
+        if (/^\+[A-Z]{2,7}(\d{1,2})?[A-Z]?\d?$/.test(token)) {
             // Détection d'un nouveau module
             if (currentModule) {
                 // Si on a un cours partiellement rempli, on l'ajoute
