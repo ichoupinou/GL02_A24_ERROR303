@@ -9,7 +9,7 @@ class Parser {
         this.module = /^\+[A-Z]{2,7}(\d{1,2})?[A-Z]?\d?$/;
         this.entries = {
             one: /^1$/,
-            type: /^(CM|TD|TP)\d{1,2}$/,
+            type: /^(C|D|T)\d{1,2}$/,
             capacity: /^P=\d{1,3}$/,
             day: /^H=(L|MA|ME|J|V|S)$/,
             time: /^(\d|1\d|2[0-3]):[0-5]\d-(\d|1\d|2[0-3]):[0-5][0-9]$/,
@@ -25,7 +25,7 @@ class Parser {
      *
      * @async
      * @param {string} input - Le texte à parser.
-     
+     */
     async parse(input) {
         await this.validate(await this.tokenize(input));
         return this.isCru;
@@ -37,7 +37,7 @@ class Parser {
      * @async
      * @param {string} data - Le texte à tokeniser.
      * @returns {Promise<Array>} Le tableau de tokens.
-     
+     */
     async tokenize(data) {
         data = await this.replaceAll(data, /(\/\/)/, '~//');
         const separator = /\r\n|\n|,F1,|,F2,|\r|,|~| /;
@@ -45,7 +45,6 @@ class Parser {
         tokens = tokens.filter(value => value);
         return tokens;
     }
-    */
 
     /**
      * Parse et renvoie les tokens si le fichier est valide.
@@ -53,41 +52,13 @@ class Parser {
      * @param {string} input - Le texte à parser.
      * @returns {Promise<Array|null>} Les tokens ou null si non conforme.
     */
-    async parseAndTokenize(data) {
+    async cleanData(data) {
         // Remove any non-printable characters and normalize line endings
-        const cleanedData = data
+        return data
             .replace(/[\x00-\x09\x0B-\x1F\x7F]/g, '') // Remove control characters except newline
             .replace(/\r\n/g, '\n')   // Normalize Windows line endings
             .replace(/\r/g, '\n')     // Normalize old Mac line endings
             .trim();
-    
-        // Split by line, filtering out truly empty lines
-        const lines = cleanedData.split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length > 0);
-    
-        const tokens = [];
-        for (const line of lines) {
-            // More robust token splitting
-            const lineTokens = line
-                .split(/[,\s]+/)
-                .filter(token => token.trim() !== '');
-    
-            tokens.push(...lineTokens);
-            
-            // Add end marker for each module or entry
-            if (line.startsWith('+') || line.endsWith('//')) {
-                tokens.push('//');
-            }
-        }
-    
-        // Validate tokens
-        if (tokens.length === 0) {
-            console.error("No valid tokens found in the file.");
-            return null;
-        }
-    
-        return tokens;
     }
 
     /**
@@ -157,6 +128,20 @@ class Parser {
      */
     getTokens() {
         return this.tokens; // Variable à définir pendant le traitement.
+    }
+
+
+    /**
+     * Parse et renvoie les tokens si le fichier est valide.
+     * @async
+     * @param {string} input - Le texte à parser.
+     * @returns {Promise<Array|null>} Les tokens ou null si non conforme.
+     */
+    async parseAndTokenize(input) {
+        const cleanedInput = await this.cleanData(input);
+        this.tokens = await this.tokenize(cleanedInput); // Stocker les tokens temporairement
+        await this.validate([...this.tokens]); // Valider sur une copie pour éviter les mutations
+        return this.isCru ? this.tokens : null;
     }
 }
 
