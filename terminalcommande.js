@@ -5,6 +5,7 @@ const SPEC_1 = require('./SPEC-1.js');
 const SPEC_3 = require('./SPEC-3.js');
 const SPEC_4 = require('./SPEC-4.js');
 const SPEC_7 = require('./SPEC-7.js');
+const SPEC_9 = require('./SPEC-9.js')
 
 data = DataMain.structuredData
 module.exports = { askMainMenu, askSearchMenu, displayMainMenu, displaySearchMenu, handleMainMenu, handleSearchMenu };
@@ -124,6 +125,7 @@ function SalleCours() {
         switch (choice) {
             case '0':
                 console.log("\nVous avez choisi l'option 'Quitter'");
+                askSearchMenu();
                 return; // Quitte la fonction proprement
             default:
                 console.log(`Vous avez choisi de rechercher les salles pour le cours : ${choice}`);
@@ -146,6 +148,7 @@ function DisponibiliteSalle() {
         switch (choice) {
             case '0':
                 console.log("\nVous avez choisi l'option 'Quitter'");
+                askSearchMenu();
                 return; // Quitte la fonction proprement
             default:
                 console.log(`Vous avez choisi de rechercher les créneaux pour la salle : ${choice}`);
@@ -177,23 +180,22 @@ function ClassementCapaciteSalle() {
 }
 
 function VisuelOccupationSalle() {
-    console.log("\nTaux d'occupation des salles");
+    console.log("\nVous avez choisi l'option 'Visuel taux d'occupation d'une salle'");
+    console.log("Quel est la salle dont vous recherchez le taux d'occupation ?");
+    console.log("0 - Quitter");
 
-    rooms.forEach(room => {
-        const roomSchedules = schedules.filter(schedule => schedule.roomId === room.id);
-        const occupiedHours = roomSchedules.reduce((total, schedule) => {
-            const start = new Date(`2024-01-01T${schedule.startTime}`);
-            const end = new Date(`2024-01-01T${schedule.endTime}`);
-            return total + (end - start) / (1000 * 60 * 60);
-        }, 0);
-
-        const totalWeeklyHours = 40; // Assuming 40-hour work week
-        const occupationRate = (occupiedHours / totalWeeklyHours * 100).toFixed(2);
-
-        console.log(`Salle ${room.id}: ${occupationRate}% occupée`);
+    rl.question('Votre choix : ', (choice) => {
+        switch (choice) {
+            case '0':
+                console.log("\nVous avez choisi l'option 'Quitter'");
+                askSearchMenu();
+                return; // Quitte la fonction proprement
+            default:
+                console.log(`Vous avez choisi de voir le taux d'occupation de la salle : ${choice}`);
+                SPEC_9.visualiserOccupation(choice);       
+                rl.close();
+        }
     });
-
-    askMainMenu();
 }
 
 
