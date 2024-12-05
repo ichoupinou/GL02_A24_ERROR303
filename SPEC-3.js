@@ -77,4 +77,4 @@ function timeToMinutes(time) {
     const [hours, minutes] = time.split(':').map(Number);
     return hours * 60 + minutes;
 }
-module.exports = {findFreeSlotsByRoom};
+module.exports = {findFreeSlotsByRoom, timeToMinutes};

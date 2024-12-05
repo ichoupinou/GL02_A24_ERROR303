@@ -1,3 +1,4 @@
+const SPEC_3 = require('./SPEC-3');
 function findFreeRooms(day, startTime, endTime) {
     // Collecte toutes les salles de tous les cours
     const allRooms = new Set();
@@ -8,8 +9,8 @@ function findFreeRooms(day, startTime, endTime) {
     });
 
     // Convertir les heures demandées en minutes
-    const reqStartTime = timeToMinutes(startTime);
-    const reqEndTime = timeToMinutes(endTime);
+    const reqStartTime = SPEC_3.timeToMinutes(startTime);
+    const reqEndTime = SPEC_3.timeToMinutes(endTime);
 
     // Trouver les salles occupées pour le créneau horaire spécifié
     const occupiedRooms = new Set();
@@ -19,8 +20,8 @@ function findFreeRooms(day, startTime, endTime) {
             if (classe.day !== day) return;
 
             // Convertir les horaires de la classe en minutes
-            const classStartTime = timeToMinutes(classe.start);
-            const classEndTime = timeToMinutes(classe.end);
+            const classStartTime = SPEC_3.timeToMinutes(classe.start);
+            const classEndTime = SPEC_3.timeToMinutes(classe.end);
 
             // Vérifier si les horaires se chevauchent
             const isOverlapping = (reqStartTime < classEndTime && reqEndTime > classStartTime);
@@ -45,11 +46,6 @@ function findFreeRooms(day, startTime, endTime) {
     }
 
     return freeRooms;
-}
-
-function timeToMinutes(time) {
-    const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
 }
 
 module.exports = {findFreeRooms};
