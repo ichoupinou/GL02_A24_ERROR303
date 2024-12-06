@@ -6,6 +6,8 @@
  * @returns {void} Cette fonction ne retourne rien, mais affiche les salles du cours.
  */
 function getRoomsForCourse(data, courseName) {
+    //change les minuscules en Majuscules au cas où l'utilisateur a mis des minuscules
+    courseName = courseName.toUpperCase();
     // Cherche le module correspondant au cours
     const course = data.find(course => course.module === courseName);
 
