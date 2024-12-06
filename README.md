@@ -80,6 +80,36 @@ L'application propose un menu interactif en ligne de commande avec plusieurs opt
 
 ## Tests Unitaires
 
+Les tests unitaires se trouvent dans "./jasmin_unit_test.spec.js"
+En se positionnant dans le dossier du fichier, on peut réaliser les tests unitaires de tel façon
+
+```bash
+npm test
+
+```
+## Tests Unitaires
+
+### Fonction `verifSalle`
+
+- **Test 1 :** Vérifie qu'une salle existante retourne `true`
+    - Salles testées : A002, S102, D105
+- **Test 2 :** Vérifie qu'une salle inexistante retourne `false`
+    - Cas de test : Salle X999, chaîne vide
+
+### Fonction `printedMaxCapacity`
+
+- **Test 1 :** Retourne la capacité maximale d'une salle existante
+    - Exemple : Salle A002
+- **Test 2 :** Gère correctement une salle inexistante
+    - Exemple : Salle X999
+
+### Fonction `getRoomsForCourse`
+
+- **Test 1 :** Retourne la liste des salles pour un cours existant
+    - Exemple : Cours MA03
+- **Test 2 :** Gère un cours inexistant
+    - Exemple : Cours FB02
+
 ## Contributeurs
 
 Anaëlle MELO (anaelle.melo@utt.fr)
