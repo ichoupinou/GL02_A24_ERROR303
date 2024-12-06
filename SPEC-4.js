@@ -1,4 +1,13 @@
 const SPEC_3 = require('./SPEC-3');
+/**
+ * Fonction qui affiche les salles libres à un créneau donné
+ * Exemple de donnée : "L", "10:00", "12:00"
+ *
+ * @param {string} day le jour où on veut le créneau
+ * @param {string} startTime l'heure de début du créneau
+ * @param {string} endTime l'heure de fin du créneau
+ * @returns {void} Cette fonction ne retourne rien, mais affiche les salles libre au créneau voulu.
+ */
 function findFreeRooms(day, startTime, endTime) {
     // Collecte toutes les salles de tous les cours
     const allRooms = new Set();
