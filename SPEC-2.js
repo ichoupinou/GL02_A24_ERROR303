@@ -3,25 +3,41 @@ module.exports={verifSalle, printedMaxCapacity, MaxCapacity};
 const DataMain = require('./main.js');
 data = DataMain.structuredData
 
-// Fonmction qui renvoie vrai si la salle existe dans la base de donnée, 
-// Et faux sinon
+/**
+ * Fonction qui renvoie vrai si la salle donnée existe dans la base de donnée, et faux sinon
+ * Exemple de donnée : "D105"
+ *
+ * @param {string} salle - La salle dont on veut vérifier l'existence dans la base de données.
+ * @returns {boolean} Vrai si la salle existe dans la base de données, faux sinon.
+ */
 function verifSalle(salle) {
     return data.some(module => 
         module.classes.some(classEntry => classEntry.room === salle)
     );
 }
 
-//Fonction qui renvoie la capacité maximale d'une salle dans une base donnée
+/**
+ * Fonction qui affiche la capacité maximale d'une salle donnée
+ * Exemple de donnée : "D105"
+ *
+ * @param {string} salle - La salle dont on veut vérifier l'existence dans la base de données.
+ */
 function printedMaxCapacity(salle) {
     let verif = verifSalle(salle); //peut partir
     if (!verif){
         console.log("Erreur : la salle n'existe pas dans la base de données.");
-        retur;
+        return;
     }
     console.log(`La capacité maximale de la salle ${salle} est : ${MaxCapacity(salle)}`);
-    
 }
 
+/**
+ * Fonction qui renvoie la capacité maximale d'une salle donnée
+ * Exemple de donnée : "D105" (on sait que la salle existe dans la base de données)
+ *
+ * @param {string} salle - La salle dont on veut avoir la capacité maximale.
+ * @returns {int} La capacité maximale de la salle.
+ */
 function MaxCapacity(salle){
     let maxCapacite = 0;
     for (const course of data) {
