@@ -4,13 +4,13 @@ const path = require('path');
 const file = path.resolve(__dirname, './sample/edt.cru');
 let structuredData = null;
 
-// Suppression du warning Punycode 
+// Suppression du warning Punycode causé par la SPEC-9
 const originalEmitWarning = process.emitWarning;
     process.emitWarning = function(warning, ...args) {
         if (typeof warning === 'string' && warning.includes('punycode')) return;
         return originalEmitWarning(warning, ...args);
     };
-    
+
 // Lecture du fichier
 fs.readFile(file, 'utf8', async (err, data) => {
     if (err) {
