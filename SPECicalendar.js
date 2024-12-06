@@ -3,8 +3,6 @@
 const DataMain = require('./main.js');
 data = DataMain.structuredData  
 
-const BasicFunctions = require('./terminalcommande.js');
-
 /**
  * Lance le processus de génération d'un emploi du temps personnalisé au format iCalendar.
  * 
@@ -15,6 +13,31 @@ const BasicFunctions = require('./terminalcommande.js');
 function generatePersonalSchedule() {
     console.log("Bienvenue dans l'outil de génération de fichier ICalendar");
     askForCourses();
+}
+
+/**
+ * Vérifie si un cours correspondant au code donné existe dans les données.
+ *
+ * @function findCourse
+ * @param {string} courseCode - Le code du cours à rechercher.
+ * @returns {boolean} `true` si un module correspondant est trouvé, sinon `false`.
+ */
+function findCourse(courseCode) {
+    return data.some(module => module.module === courseCode);
+}
+
+/**
+ * Vérifie si un groupe spécifique existe dans les données.
+ * 
+ * Cette fonction recherche un groupe donné (par son code) dans les modules. Elle retourne `true` si le groupe est trouvé, sinon elle retourne `false`.
+ *
+ * @param {string} groupCode - Le code du groupe à rechercher.
+ * @returns {boolean} Retourne `true` si le groupe existe, sinon `false`.
+ */
+function findGroup(groupCode) {
+    return data.some(module => 
+        module.classes.some(classGroup => classGroup.group === groupCode)
+    );
 }
 
 /**
@@ -163,7 +186,7 @@ function askForCourses() {
                     }
                     return;
                 default:
-                    if (BasicFunctions.findCourse(input) == true) {
+                    if (findCourse(input) == true) {
                         console.log(`Cours ajouté: ${input}`);
                         list_courses.push(input);
                     } else {
@@ -214,7 +237,7 @@ function askForGroups(list_courses) {
                         }
                         return;
                     default:
-                        if (BasicFunctions.findGroup(input) == true) {
+                        if (findGroup(input) == true) {
                             console.log(`Groupe ajouté: ${input}`);
                             dict_courses_selected[course] = findGroupModule(input);
                         } else {
