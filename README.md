@@ -1,6 +1,17 @@
 # Outil de Gestion et Suivi d'Occupation des Salles de Cours
 Destiné aux gestionnaires de locaux de l'Université Centrale de la République de Sealand (SRU), au personnel du service informatique, et aux développeurs impliqués dans la réalisation de l'outil de gestion des salles de cours
 
+## Table des matières
+1. [Prérequis](#prérequis)
+2. [Packages Requis](#packages-requis)
+3. [Visualisation de Données](#visualisation-de-données)
+4. [Structure des Données](#structure-des-données)
+5. [Lancement de l'Application](#lancement-de-l'application)
+6. [Interface Utilisateur](#interface-utilisateur)
+7. [Remarques](#remarques)
+8. [Dépannage](#dépannage)
+9. [Tests Unitaires](#tests-unitaires)
+
 ## Prérequis
 
 ### Dépendances
@@ -87,23 +98,22 @@ En se positionnant dans le dossier du fichier, on peut réaliser les tests unita
 npm test
 
 ```
-## Tests Unitaires
 
-### Fonction `verifSalle`
+## Fonction `verifSalle`
 
 - **Test 1 :** Vérifie qu'une salle existante retourne `true`
     - Salles testées : A002, S102, D105
 - **Test 2 :** Vérifie qu'une salle inexistante retourne `false`
     - Cas de test : Salle X999, chaîne vide
 
-### Fonction `printedMaxCapacity`
+## Fonction `printedMaxCapacity`
 
 - **Test 1 :** Retourne la capacité maximale d'une salle existante
     - Exemple : Salle A002
 - **Test 2 :** Gère correctement une salle inexistante
     - Exemple : Salle X999
 
-### Fonction `getRoomsForCourse`
+## Fonction `getRoomsForCourse`
 
 - **Test 1 :** Retourne la liste des salles pour un cours existant
     - Exemple : Cours MA03
