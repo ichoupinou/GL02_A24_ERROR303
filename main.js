@@ -1,33 +1,49 @@
 const Parser = require('./parser.js');
 const fs = require('fs');
 const path = require('path');
-const file = path.resolve(__dirname, 'sample/edttotal_clean.cru');
+const file = path.resolve(__dirname, './sample/edt.cru');
 let structuredData = null;
 
+// Suppression du warning Punycode 
+const originalEmitWarning = process.emitWarning;
+    process.emitWarning = function(warning, ...args) {
+        if (typeof warning === 'string' && warning.includes('punycode')) return;
+        return originalEmitWarning(warning, ...args);
+    };
+    
+// Lecture du fichier
 fs.readFile(file, 'utf8', async (err, data) => {
     if (err) {
         console.error("Erreur lors de la lecture du fichier :", err);
         return;
     }
 
+    // Créer une nouvelle instance de Parser
     const parser = new Parser();
 
+    console.log("Validation et tokenisation en cours...");
+
     try {
-        console.log("Validation et tokenisation en cours...");
+        // Parse et récupère les tokens structurés
         const tokens = await parser.parseAndTokenize(data);
 
         if (tokens) {
             console.log(`Le fichier ${file} est conforme au format CRU.`);
 
-            structuredData = organizeTokens(tokens);
+            // Organisation des données
+            structuredData = organizeTokensbis(tokens);
             
+            // Export the structured data
             module.exports = { structuredData };
             
-            console.log("Structured Data: ");
-            console.log(JSON.stringify(structuredData, null, 2));
+            //console.log("Structured Data: ");
+            //console.log(JSON.stringify(structuredData, null, 2));
 
+            // Lancer l'application APRES le traitement du fichier
             const Menu = require('./terminalcommande.js');
+            //Menu.mainTest();
             Menu.askMainMenu();
+
         } else {
             console.log(`Le fichier ${file} n'est pas conforme au format CRU.`);
         }
@@ -40,7 +56,6 @@ fs.readFile(file, 'utf8', async (err, data) => {
  * tableau d'objets représentant des lignes de cours en données organisées
  * Exemple de structure : données organisées par cours avec leurs attributs
  *
- * @function transformStructuredDataToClasses
  * @param {Array<string>} tokens - Les tokens à organiser.
  * @returns {Array<Object>} Données organisées.
  */
@@ -68,16 +83,15 @@ function transformStructuredDataToClasses(data) {
  * Organise les tokens en une structure de données.
  * Exemple de structure : Données organisées par cours avec leurs attributs
  *
- * @function organizeTokens
  * @param {Array<string>} tokens - Les tokens à organiser.
  * @returns {Array<Object>} Données organisées.
  */
-function organizeTokens(tokens) {
+function organizeTokensbis(tokens) {
     const organized = [];
     let currentModule = null;
     let currentCourse = [];
     for (const token of tokens) {
-        if (/^\+[A-Z]{2,7}(\d{1,2})?[A-Z]?\d?$/.test(token)) {
+        if (/^\+[A-Z]{2,4}(\d{1,2})?[A-Z]?\d?$/.test(token)) {
             // Détection d'un nouveau module
             if (currentModule) {
                 // Si on a un cours partiellement rempli, on l'ajoute
@@ -94,7 +108,7 @@ function organizeTokens(tokens) {
             };
         } else if (currentModule) {
             // Ajouter le token au cours courant
-            if (/^1$|^(C|D|T)\d{1,2}$|^P=\d{1,3}$|^H=(L|MA|ME|J|V|S)$|^(\d|1\d|2[0-3]):[0-5]\d-(\d|1\d|2[0-3]):[0-5][0-9]$|^[A-Z]([0-9]|[A-Z])?$|^S=(?:SPOR|[A-Z]{1,3}\d{1,3})?$/.test(token)) {
+            if (/^1$|^(C|D|T)\d{1,2}$|^P=\d{1,3}$|^H=(L|MA|ME|J|V|S)$|^(\d|1\d|2[0-3]):[0-5]\d-(\d|1\d|2[0-3]):[0-5][0-9]$|^[A-Z]([0-9]|[A-Z])?$|^S=[A-Z]{1,3}\d{1,3}$/.test(token)) {
                 // Transformer les valeurs spécifiques
                 if (/^[CTD]\d{1,2}$/.test(token)) {
                     // Replace C1 -> CM1, T1 -> TP1, D1 -> TD1 dynamically
@@ -103,14 +117,14 @@ function organizeTokens(tokens) {
                         if (letter === 'C') return 'CM' + number;
                         if (letter === 'T') return 'TP' + number;
                         if (letter === 'D') return 'TD' + number;
-                        return match;  // si pas de match trouvé, on return la valeur originale du token
+                        return match;  // If no match, return the original token
                     });
-                    currentCourse.push(transformedToken);  //ajout du transformedToken
+                    currentCourse.push(transformedToken);  // Add the transformed token
                 } else if (/^P=\d{1,3}$/.test(token)) {
                     currentCourse.push(parseInt(token.split("=")[1])); // "P=50" -> 50 (int)
                 } else if (/^H=(L|MA|ME|J|V|S)$/.test(token)) {
                     currentCourse.push(token.split("=")[1]); // "H=MA" -> "MA"
-                } else if (/^S=[A-Z]{1,3}\d{1,3}$/.test(token)) {
+                } else if (/^S=[A-Z]{1,3}\d{1,3}|S=SPOR$/.test(token)) {
                     currentCourse.push(token.split("=")[1]); // "S=LAB102" -> "LAB102"
                 } else if (/^(\d|1\d|2[0-3]):[0-5]\d-(\d|1\d|2[0-3]):[0-5][0-9]$/.test(token)) {
                     const [start, end] = token.split("-"); // "08:00-09:30" -> ["08:00", "09:30"]
@@ -138,7 +152,7 @@ function organizeTokens(tokens) {
         organized.push(currentModule);
     }
 
-    //on range tout dans une structure de données
+
     structuredData = transformStructuredDataToClasses(organized)
 
     return structuredData;
