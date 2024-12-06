@@ -1,7 +1,6 @@
 const readline = require('readline');
 const fs = require('fs');
 const DataMain = require('./main.js');
-
 data = DataMain.structuredData
 
 module.exports={askMainMenu};
@@ -9,7 +8,7 @@ module.exports={askMainMenu};
 //Importation des fonctions des SPEC 2, 8 et 9 - SPEC de Anaelle
 const SPEC_2 = require('./SPEC-2.js');  //SPEC 2 - afficher la capacité lax d'une salle donnée
 const SPEC_8 = require('./SPEC-8.js');  //SPEC 8 - affichage du classement des salles par capacité
-//const SPEC_9 = require('./SPEC-9.js');  //SPEC 9 - visuel du taux d'occupation de chaque salle
+const SPEC_9 = require('./SPEC-9.js');  //SPEC 9 - visuel du taux d'occupation de chaque salle
 
 // Création d'une interface pour lire et écrire dans la console
 const rl = readline.createInterface({
@@ -57,7 +56,7 @@ function handleMainMenu(choice) {
             Chevauchement();
             return;
         case '5':
-            ClassementCapaciteSalle();
+            RankingRoomCapacity();
             return;
         case '6':
             VisuelOccupationSalle();
@@ -80,7 +79,7 @@ function handleSearchMenu(choice) {
             SalleCours();
             return;
         case '2':
-            CapaciteSalle();
+            RoomCapacity();
             return;
         case '3':
             DisponibiliteSalle();
@@ -342,7 +341,7 @@ function generatePersonalSchedule() {
 }
 
 // SPEC 2 - Afficher la capacité maximum d'une salle
-function CapaciteSalle(){
+function RoomCapacity(){
     console.log("\nVous avez choisi l'option 'Trouver la capacité max d'une salle'");
     console.log("Quel est la salle dont vous recherchez la capacité ?");
     console.log("0 - Quitter");
@@ -355,17 +354,17 @@ function CapaciteSalle(){
             default:
                 console.log(`Vous avez choisi de rechercher la capacité de la salle : ${salle}`);
                 SPEC_2.printedMaxCapacity(salle);
-                askMainMenu();
+                waitForMenu();
         }
     }
     )
 }
 
 // SPEC 8 - Afficher un classement par capacité des salles données
-function ClassementCapaciteSalle(){
+function RankingRoomCapacity(){
     console.log("\nVous avez choisi l'option 'Classement des salles en fonction de leur capacité d'accueil'");
     console.log("0 - Quitter");
-    afficherSalles();
+    printRooms();
     const listSalles = [];
     function ask() {
         rl.question("Entrez les salles que vous souhaitez ajouter au classement ((ou '1' pour terminer, '0' pour sortir) : ", (input) => {
@@ -399,8 +398,34 @@ function ClassementCapaciteSalle(){
     ask();
 }
 
+// SPEC 9 - Visualiser le taux d'occupation d'une salle
+function VisuelOccupationSalle() {
+    console.log("\nVous avez choisi l'option 'Visuel taux d'occupation d'une salle'");
+    console.log("Quel est la salle dont vous recherchez le taux d'occupation dans la semaine ?");
+    console.log("0 - Quitter");
+    printRooms();
+    rl.question('Votre choix : ', (choice) => {
+        switch (choice) {
+            case '0':
+                console.log("\nVous avez choisi l'option 'Quitter'");
+                askMainMenu();
+                return; 
+            default:
+                if (SPEC_2.verifSalle(choice) == true) {
+                    console.log(`Vous avez choisi de voir le taux d'occupation de la salle : ${choice}`);
+                    SPEC_9.visualiserOccupationJour(choice);
+                    waitForMenu();
+                    return;
+                } else {
+                    console.log("Erreur : la salle n'existe pas dans la base de données, recommencez.");
+                    VisuelOccupationSalle();
+                }
+        }
+    });
+}
+
 // Affichage de l'ensemble des salles présentes dans la base de données
-function afficherSalles(){
+function printRooms(){
     const listSalles = [];
     console.log("L'ensemble des salles disponibles est : ");
     for (const course of data) {
@@ -411,4 +436,15 @@ function afficherSalles(){
             }
         }
     }
+}
+// Fonction qui attend que l'utilisateur fasse "Entrée" pour afficher le menu
+function waitForMenu(){
+    rl.question('Faites "Entrée" pour passer à la suite : ', (anything) => {
+        switch (anything) {
+            default:
+                askMainMenu();
+                return;
+        }
+    }
+    )
 }
