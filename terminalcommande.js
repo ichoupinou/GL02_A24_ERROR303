@@ -450,13 +450,14 @@ function VisuelOccupationSalle() {
     console.log("0 - Quitter");
     printRooms();
     rl.question('Votre choix : ', (choice) => {
+        choice=choice.toUpperCase(); // Met en majuscule
         switch (choice) {
             case '0':
                 console.log("\nVous avez choisi l'option 'Quitter'");
                 askMainMenu();
                 return; 
             default:
-                if (SPEC_2.verifSalle(choice) == true) {
+                if (SPEC_2.verifSalle(data, choice) == true) {
                     console.log(`Vous avez choisi de voir le taux d'occupation de la salle : ${choice}`);
                     SPEC_9.visualiserOccupationJour(choice);
                     waitForMenu();
