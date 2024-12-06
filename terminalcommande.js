@@ -211,7 +211,7 @@ function RoomCapacity(){
                 return; 
             default:
                 console.log(`Vous avez choisi de rechercher la capacité de la salle : ${salle}`);
-                SPEC_2.printedMaxCapacity(salle);
+                SPEC_2.printedMaxCapacity(data, salle);
                 waitForMenu();
         }
     })
