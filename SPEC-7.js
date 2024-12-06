@@ -1,4 +1,10 @@
 const SPEC_3 = require('./SPEC-3');
+/**
+ * Fonction qui affiche les salles et les créneaux où il y a un chevauchement.
+ *
+ * @param {string} data - Les données des cours
+ * @returns {void} Cette fonction ne retourne rien, mais affiche les salles et les créneaux où il y a un chevauchement.
+ */
 function checkOverlaps(data) {
     // Regroupe les classes par salle
     const classesByRoom = {};

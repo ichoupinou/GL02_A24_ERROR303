@@ -1,3 +1,10 @@
+/**
+ * Fonction qui affiche les horaires libres pour une salle
+ * Exemple de donnée : "D105"
+ *
+ * @param {string} salle - La salle dont on veut afficher les horaires libres.
+ * @returns {void} Cette fonction ne retourne rien, mais affiche les horaires libres de la salle.
+ */
 function findFreeSlotsByRoom(specificRoom) {
     // Récupérer toutes les classes pour la salle spécifique
     const roomClasses = data.flatMap(module =>
