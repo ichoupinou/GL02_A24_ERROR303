@@ -308,6 +308,7 @@ function RankingRoomCapacity(){
     const listSalles = [];
     function ask() {
         rl.question("Entrez les salles que vous souhaitez ajouter au classement ((ou '1' pour terminer, '0' pour sortir) : ", (input) => {
+            input=input.toUpperCase(); // Met en majuscule
             switch (input) {
                 case '0':
                     console.log("Vous avez choisi de quitter");
@@ -352,6 +353,7 @@ function VisuelOccupationSalle() {
     console.log("0 - Quitter");
     printRooms();
     rl.question('Votre choix : ', (choice) => {
+        choice=choice.toUpperCase(); // Met en majuscule
         switch (choice) {
             case '0':
                 console.log("\nVous avez choisi l'option 'Quitter'");
