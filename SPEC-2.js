@@ -13,13 +13,13 @@ data = DataMain.structuredData
  * @param {string} salle - La salle dont on veut afficher la capacité maximale.
  * @returns {void} Cette fonction ne retourne rien, mais affiche la capacité maximale de la salle donnée
  */
-function printedMaxCapacity(salle) {
+function printedMaxCapacity(data, salle) {
     salle=salle.toUpperCase(); // Met en majuscule
-    if (!verifSalle(salle)){
+    if (!verifSalle(data, salle)){
         console.log("Erreur : la salle n'existe pas dans la base de données.");
         return;
     }
-    console.log(`La capacité maximale de la salle ${salle} est : ${MaxCapacity(salle)}`);
+    console.log(`La capacité maximale de la salle ${salle} est : ${MaxCapacity(data, salle)}`);
 }
 
 // ------------------------------------------------------------
@@ -32,7 +32,7 @@ function printedMaxCapacity(salle) {
  * @param {string} salle - La salle dont on veut vérifier l'existence dans la base de données.
  * @returns {boolean} Vrai si la salle existe dans la base de données, faux sinon.
  */
-function verifSalle(salle) {
+function verifSalle(data, salle) {
     return data.some(module => 
         module.classes.some(classEntry => classEntry.room === salle)
     );
@@ -45,7 +45,7 @@ function verifSalle(salle) {
  * @param {string} salle - La salle dont on veut avoir la capacité maximale.
  * @returns {int} La capacité maximale de la salle.
  */
-function MaxCapacity(salle){
+function MaxCapacity(data, salle){
     let maxCapacite = 0;
     for (const course of data) {
         for (const classEntry of course.classes) {
