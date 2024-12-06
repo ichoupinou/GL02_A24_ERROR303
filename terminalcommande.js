@@ -16,6 +16,9 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
+// --------------------------------------------------------------
+// Affichage des menus
+
 // Affichage du menu principal
 function displayMainMenu() {
     console.log("\nBienvenue dans l'Outil de Gestion et Suivi d'Occupation des Salles de Cours :");
@@ -30,6 +33,7 @@ function displayMainMenu() {
     console.log('0 - Quitter');
 }
 
+// Affichage du menu recherche
 function displaySearchMenu() {
     console.log('\nMenu de recherche');
     console.log('Choisissez une option de recherche :');
@@ -39,6 +43,9 @@ function displaySearchMenu() {
     console.log('4 - Recherche des salles libre à un créneau');
     console.log('0 - Quitter');
 }
+
+// --------------------------------------------------------------
+// Gérer les choix
 
 // Gérer les choix dans le main menu
 function handleMainMenu(choice) {
@@ -70,8 +77,6 @@ function handleMainMenu(choice) {
     }
 }
 
-//on fait return après une fonction
-
 // Gérer les choix dans le menu recherche
 function handleSearchMenu(choice) {
     switch (choice) {
@@ -92,8 +97,12 @@ function handleSearchMenu(choice) {
             return;
         default:
             console.log('Option invalide. Veuillez choisir un nombre entre 0 et 4.');
+            handleSearchMenu();
     }
 }
+
+// --------------------------------------------------------------
+// Demande des commandes
 
 // Demander une commande dans le menu principal
 function askMainMenu() {
@@ -120,6 +129,9 @@ function askSearchMenu() {
         }
     });
 }
+
+// --------------------------------------------------------------
+// 
 
 // Check if the course exists in data
 function findCourse(courseCode) {
@@ -340,7 +352,16 @@ function generatePersonalSchedule() {
     askForCourses();
 }
 
+// --------------------------------------------------------------
+// 
+
 // SPEC 2 - Afficher la capacité maximum d'une salle
+/**
+ * Demande une salle à l'utilisateur, vérifie qu'elle existe dans la base de données
+ * et ensuite affiche sa capacité maximale.
+ *
+ * @returns {void} Cette fonction ne retourne rien 
+ */
 function RoomCapacity(){
     console.log("\nVous avez choisi l'option 'Trouver la capacité max d'une salle'");
     console.log("Quel est la salle dont vous recherchez la capacité ?");
@@ -350,7 +371,7 @@ function RoomCapacity(){
             case '0':
                 console.log("\nVous avez choisi l'option 'Quitter'");
                 askSearchMenu();
-                return; // Quitte la fonction proprement
+                return; 
             default:
                 console.log(`Vous avez choisi de rechercher la capacité de la salle : ${salle}`);
                 SPEC_2.printedMaxCapacity(salle);
@@ -361,6 +382,12 @@ function RoomCapacity(){
 }
 
 // SPEC 8 - Afficher un classement par capacité des salles données
+/**
+ * Demande plusisurs salles à l'utilisateur, vérifie qu'elles existe dans la base de données
+ * et ensuite appelle une fonction qui génère un classement des salles données par capacité maximale.
+ *
+ * @returns {void} Cette fonction ne retourne rien 
+ */
 function RankingRoomCapacity(){
     console.log("\nVous avez choisi l'option 'Classement des salles en fonction de leur capacité d'accueil'");
     console.log("0 - Quitter");
@@ -399,6 +426,12 @@ function RankingRoomCapacity(){
 }
 
 // SPEC 9 - Visualiser le taux d'occupation d'une salle
+/**
+ * Demande une salle à l'utilisateur, vérifie qu'elle existe dans la base de données
+ * et ensuite appelle une fonction qui génère une visualisation du taux d'occupation de la salle.
+ *
+ * @returns {void} Cette fonction ne retourne rien 
+ */
 function VisuelOccupationSalle() {
     console.log("\nVous avez choisi l'option 'Visuel taux d'occupation d'une salle'");
     console.log("Quel est la salle dont vous recherchez le taux d'occupation dans la semaine ?");
@@ -424,7 +457,11 @@ function VisuelOccupationSalle() {
     });
 }
 
-// Affichage de l'ensemble des salles présentes dans la base de données
+/**
+ * Affichage de l'ensemble des salles présentes dans la base de données
+ *
+ * @returns {void} Cette fonction ne retourne rien 
+ */
 function printRooms(){
     const listSalles = [];
     console.log("L'ensemble des salles disponibles est : ");
@@ -437,7 +474,13 @@ function printRooms(){
         }
     }
 }
-// Fonction qui attend que l'utilisateur fasse "Entrée" pour afficher le menu
+
+
+/**
+ * Fonction qui attend que l'utilisateur fasse "Entrée" pour afficher le menu
+ *
+ * @returns {void} Cette fonction ne retourne rien
+ */
 function waitForMenu(){
     rl.question('Faites "Entrée" pour passer à la suite : ', (anything) => {
         switch (anything) {
