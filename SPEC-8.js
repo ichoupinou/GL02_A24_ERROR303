@@ -18,7 +18,7 @@ function classementSalles(listSalles) {
     // Trouver la capacité maximale pour chaque salle
     const capacites = listSalles.map((salle) => ({
         salle, 
-        capacite: SPEC2bis.MaxCapacity(salle)
+        capacite: SPEC2bis.MaxCapacity(data, salle)
     }));
 
     // Trier par capacité décroissante
