@@ -319,7 +319,6 @@ function RankingRoomCapacity(){
                         console.log('Géneration du classement des salles sélectionnées...');
                         SPEC_8.classementSalles(listSalles);
                         waitForMenu();
-                        askMainMenu();
                         return
                     } else {
                         console.log('Pas de groupes choisis, veuillez réessayer');
