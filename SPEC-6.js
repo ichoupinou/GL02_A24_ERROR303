@@ -3,6 +3,9 @@
 const DataMain = require('./main.js');
 data = DataMain.structuredData  
 
+//export fonction generatePersonalSchedule()
+module.exports={generatePersonalSchedule}
+
 /**
  * Lance le processus de génération d'un emploi du temps personnalisé au format iCalendar.
  * 
