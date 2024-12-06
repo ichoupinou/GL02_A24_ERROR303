@@ -1,3 +1,10 @@
+/**
+ * Fonction qui affiche les salles d'un cours donné
+ * Exemple de donnée : "MT03"
+ *
+ * @param {string} courseName Le cours dont on veut les salles.
+ * @returns {void} Cette fonction ne retourne rien, mais affiche les salles du cours.
+ */
 function getRoomsForCourse(data, courseName) {
     // Cherche le module correspondant au cours
     const course = data.find(course => course.module === courseName);
