@@ -10,6 +10,7 @@ const fs = require('fs');
 // npm install vega-lite
 const vg = require("vega");
 const vegalite = require("vega-lite");
+const { exec } = require('child_process');
 
 // ------------------------------------------------------------
 // Fonction appelée depuis terminalcommande
@@ -50,8 +51,8 @@ function visualiserOccupationJour(salle){
     const barChart = {
          "title": `Occupation de la salle ${salle} par jour`,
         "data": { "values": dataParJour },
-        "width": 400,
-        "height": 300,
+        "width": 900,
+        "height": 700,
         "mark": "bar",
         "encoding": {
             "x": { "field": "jour", 
@@ -60,6 +61,9 @@ function visualiserOccupationJour(salle){
                 "sort": ["L", "MA", "ME", "J","V", "S"],
                 "scale": {
                     "domain": ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"],
+                },
+                "axis": {
+                    "labelAngle": 0  ,
                 }
             },
             "y": { 
@@ -85,9 +89,14 @@ function visualiserOccupationJour(salle){
         },
         "config": {
             "title": {
-                "fontSize": 16,
+                "fontSize": 30,
                 "fontWeight": "bold",
                 "color": "#333"
+            },
+            "legend": {
+                "labelFontSize": 17,  // Increase legend text size
+                "titleFontSize": 17,   // Increase legend title size
+                "title": "Disponibilité",
             }
         }
     };
@@ -97,13 +106,28 @@ function visualiserOccupationJour(salle){
     const runtime = vg.parse(myChart);
     const view = new vg.View(runtime).renderer('svg').run();
     const mySvg = view.toSVG();
-    
     mySvg.then(function(res){
         fs.writeFileSync("barChart_VisuelOccupation.svg", res);
-        console.log("\n Graphique sauvegardé sous 'barChart_VisuelOccupation.svg'.");
-        view.finalize();
-    }).catch(err => {
-        console.error("Erreur lors de la génération du graphique :", err);
+        console.log("Graphique sauvegardé sous 'barChart_VisuelOccupation.svg'.");
+        
+        // Ouvrir le fichier selon le système d'exploitation
+        let command;
+        switch (process.platform) {
+            case 'darwin':  // macOS
+                command = `open barChart_VisuelOccupation.svg`;
+                break;
+            case 'win32':   // Windows
+                command = `start barChart_VisuelOccupation.svg`;
+                break;
+            default:        // Linux
+                command = `xdg-open barChart_VisuelOccupation.svg`;
+        }
+        
+        exec(command, (error) => {
+            if (error) {
+                console.error(`Erreur lors de l'ouverture du fichier : ${error}`);
+            }
+        });
     });
     
 }
