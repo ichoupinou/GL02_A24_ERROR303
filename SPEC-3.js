@@ -6,6 +6,8 @@
  * @returns {void} Cette fonction ne retourne rien, mais affiche les horaires libres de la salle.
  */
 function findFreeSlotsByRoom(specificRoom) {
+    // Gère le cas où l'utilisateur met des minuscules
+    specificRoom = specificRoom.toUpperCase();
     // Récupérer toutes les classes pour la salle spécifique
     const roomClasses = data.flatMap(module =>
         module.classes.filter(classe => classe.room === specificRoom)
