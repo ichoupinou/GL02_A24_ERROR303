@@ -3,7 +3,7 @@ const fs = require('fs');
 const DataMain = require('./main.js');
 data = DataMain.structuredData
 
-module.exports={askMainMenu};
+module.exports={askMainMenu, waitForMenu};
 
 //Importation des fonctions des SPEC 2, 8 et 9 - SPEC de Anaelle
 const SPEC_1 = require('./SPEC-1.js');  //SPEC 1 - afficher les salles d'un cours donné
@@ -185,7 +185,7 @@ function SalleCours() {
             default:
                 console.log(`Vous avez choisi de rechercher les salles pour le cours : ${choice}`);
                 SPEC_1.getRoomsForCourse(data, choice);
-                rl.close();
+                waitForMenu();
         }
     });
 }
@@ -235,7 +235,7 @@ function DisponibiliteSalle() {
             default:
                 console.log(`Vous avez choisi de rechercher les créneaux pour la salle : ${choice}`);
                 SPEC_3.findFreeSlotsByRoom(choice);
-                rl.close();
+                waitForMenu();
         }
     });
 }
@@ -269,7 +269,7 @@ function CreneauLibreSalle() {
                 }
                 SPEC_4.findFreeRooms(jour, heureDebut, heureFin);
     
-                rl.close();
+                waitForMenu();
             });
         });
     });
@@ -290,7 +290,7 @@ function CreneauLibreSalle() {
 function Chevauchement() {
     console.log("\nVérification du non-chevauchement des cours");
     SPEC_7.checkOverlaps(data);
-    rl.close();
+    waitForMenu();
 }
 
 // SPEC 8 - Afficher un classement par capacité des salles données
@@ -316,6 +316,7 @@ function RankingRoomCapacity(){
                     if (listSalles.length > 0) {
                         console.log('Géneration du classement des salles sélectionnées...');
                         SPEC_8.classementSalles(listSalles);
+                        waitForMenu();
                         askMainMenu();
                         return
                     } else {
