@@ -5,9 +5,6 @@ data = DataMain.structuredData
 const fs = require('fs');
 
 //Importation des modules specifique à l'affichage (ils sont à installer par le client)
-// pour les installer, le client peut utiliser les commandes suivantes dans l'invite de commande : 
-// npm install vega
-// npm install vega-lite
 const vg = require("vega");
 const vegalite = require("vega-lite");
 const { exec } = require('child_process');
@@ -31,7 +28,9 @@ function visualiserOccupationJour(salle){
         "V": "Vendredi", 
         "S": "Samedi"
     };
-    
+
+    // dataParJour va contenir les données que l'on utilise pour afficher le graphique, c'est à dire
+    // le nombre d'heures pendant lesquelles la salle est occupée, le nombre d'heures pendant lesquelles elle est libre, et quel jour
     const jours = ["L", "MA", "ME", "J", "V", "S"];
     const dataParJour = jours.flatMap(jourAbrege => {
         const stats = tauxParJour(jourAbrege, salle);
@@ -48,6 +47,8 @@ function visualiserOccupationJour(salle){
             }
         ];
     });
+
+    // création de barChart, qui contient les données du graphique VegaLite
     const barChart = {
          "title": `Occupation de la salle ${salle} par jour`,
         "data": { "values": dataParJour },
@@ -94,13 +95,14 @@ function visualiserOccupationJour(salle){
                 "color": "#333"
             },
             "legend": {
-                "labelFontSize": 17,  // Increase legend text size
-                "titleFontSize": 17,   // Increase legend title size
+                "labelFontSize": 17,  
+                "titleFontSize": 17,   
                 "title": "Disponibilité",
             }
         }
     };
-
+    
+    // création du fichier SVG qui affiche le taux d'occupation de la salle donnée
     const myChart = vegalite.compile(barChart).spec;
     
     const runtime = vg.parse(myChart);
@@ -110,7 +112,7 @@ function visualiserOccupationJour(salle){
         fs.writeFileSync("barChart_VisuelOccupation.svg", res);
         console.log("Graphique sauvegardé sous 'barChart_VisuelOccupation.svg'.");
         
-        // Ouvrir le fichier selon le système d'exploitation
+        // Ouvrir le fichier automatiquement après sa création selon le système d'exploitation
         let command;
         switch (process.platform) {
             case 'darwin':  // macOS
@@ -150,6 +152,7 @@ function tauxParJour(jour, salle) {
     for (const course of data) {
         for (const classEntry of course.classes) {
             if (classEntry.room === salle && classEntry.day === jour) {
+                //somme des heures pendant lesquelles la salle donnée est occupée donnée pour le jour donné
                 const [start, end] = [classEntry.start, classEntry.end]; // Horaires début et fin
                 const heures = parseInt(end.split(":")[0]) - parseInt(start.split(":")[0]);
                 const minutes = parseInt(end.split(":")[1]) - parseInt(start.split(":")[1]);
