@@ -6,8 +6,13 @@ data = DataMain.structuredData
 module.exports={askMainMenu};
 
 //Importation des fonctions des SPEC 2, 8 et 9 - SPEC de Anaelle
-const SPEC_2 = require('./SPEC-2.js');  //SPEC 2 - afficher la capacité lax d'une salle donnée
-const SPEC_6 = require('./SPEC-6.js');  //SPEC 6 - generation du fichier ICalendar
+const SPEC_1 = require('./SPEC-1.js');  //SPEC 1 - afficher les salles d'un cours donné
+const SPEC_2 = require('./SPEC-2.js');  //SPEC 2 - afficher la capacité max d'une salle donnée
+const SPEC_3 = require('./SPEC-3.js');  //SPEC 3 - affiche les horaires libres pour une salle
+const SPEC_4 = require('./SPEC-4.js');  //SPEC 4 - affiche les salles libres à un créneau donné
+//SPEC 5 non réalisé après discussion avec l'autre groupe
+const SPEC_6 = require('./SPEC-6.js');  //SPEC 6 - génération du fichier ICalendar
+const SPEC_7 = require('./SPEC-7.js');  //SPEC 7 - affiche salles où il y a chevauchement
 const SPEC_8 = require('./SPEC-8.js');  //SPEC 8 - affichage du classement des salles par capacité
 const SPEC_9 = require('./SPEC-9.js');  //SPEC 9 - visuel du taux d'occupation de chaque salle
 
@@ -31,10 +36,10 @@ function displayMainMenu() {
     console.log('Menu Principal');
     console.log('Choisissez une option :');
     console.log('1 - Faire une recherche');
-    console.log("2 - Visuel taux d'occupation de chaque salle");
-    console.log('3 - Générer son EDT en ICalendar');
-    console.log('4 - Vérifier le non-chevauchement');
-    console.log("5 - Classement des salles en fonction de leur capacité d'accueil");
+    console.log("2 - Visuel taux d'occupation de chaque salle"); //SPEC 9 
+    console.log('3 - Générer son EDT en ICalendar'); //SPEC 6
+    console.log('4 - Vérifier le non-chevauchement'); // SPEC 7
+    console.log("5 - Classement des salles en fonction de leur capacité d'accueil"); //SPEC 8
     console.log('0 - Quitter');
 }
 
@@ -47,10 +52,10 @@ function displayMainMenu() {
 function displaySearchMenu() {
     console.log('\nMenu de recherche');
     console.log('Choisissez une option de recherche :');
-    console.log('1 - Recherche des salles assignées à un cours');
-    console.log("2 - Recherche de la capacité maximale d'une salle");
-    console.log("3 - Recherche des disponibilités d'une salle");
-    console.log('4 - Recherche des salles libre à un créneau');
+    console.log('1 - Recherche des salles assignées à un cours'); //SPEC 1
+    console.log("2 - Recherche de la capacité maximale d'une salle"); //SPEC 2
+    console.log("3 - Recherche des disponibilités d'une salle"); //SPEC 3
+    console.log('4 - Recherche des salles libres à un créneau'); //SPEC 4
     console.log('0 - Quitter');
 }
 
@@ -70,16 +75,16 @@ function handleMainMenu(choice) {
             askSearchMenu(); // Aller au sous-menu
             return;
         case '2':
-            VisuelOccupationSalle();
+            VisuelOccupationSalle(); //SPEC 9
             return;
         case '3':
-            SPEC_6.generatePersonalSchedule();
+            SPEC_6.generatePersonalSchedule(); //SPEC 6
             break;
         case '4':
-            Chevauchement();
+            Chevauchement(); //SPEC 7 
             return;
         case '5':
-            RankingRoomCapacity();
+            RankingRoomCapacity(); //SPEC 8
             return;
         case '0':
             console.log('Au revoir !');
@@ -100,16 +105,16 @@ function handleMainMenu(choice) {
 function handleSearchMenu(choice) {
     switch (choice) {
         case '1':
-            SalleCours();
+            SalleCours(); //SPEC 1
             return;
         case '2':
-            RoomCapacity();
+            RoomCapacity(); //SPEC 2
             return;
         case '3':
-            DisponibiliteSalle();
+            DisponibiliteSalle(); //SPEC 3
             return;
         case '4':
-            CreneauLibreSalle();
+            CreneauLibreSalle(); //SPEC 4
             return;
         case '0':
             askMainMenu(); // Revenir au menu principal
@@ -158,7 +163,32 @@ function askSearchMenu() {
 }
 
 // --------------------------------------------------------------------------------
-// 
+
+
+// SPEC 1 - afficher les salles d'un cours donné
+/** 
+ * Demande un cours à l'utilisateur, puis appelle la fonction getRoomsForCourse de la SPEC-1 
+ * pour le cours donné. Cette fonction permet d'afficher les salles assignées à ce cours.
+ *
+ * @returns {void} Cette fonction ne retourne rien
+ */
+function SalleCours() {
+    console.log("\nVous avez choisi l'option 'Recherche des salles assignées à un cours'");
+    console.log("Quel est le cours dont vous recherchez les salles ?");
+    console.log("0 - Quitter");
+    rl.question('Votre choix : ', (choice) => {
+        switch (choice) {
+            case '0':
+                console.log("\\nVous avez choisi l'option 'Quitter'");
+                askSearchMenu();
+                return;
+            default:
+                console.log(`Vous avez choisi de rechercher les salles pour le cours : ${choice}`);
+                SPEC_1.getRoomsForCourse(data, choice);
+                rl.close();
+        }
+    });
+}
 
 // SPEC 2 - Afficher la capacité maximum d'une salle
 /**
@@ -182,8 +212,85 @@ function RoomCapacity(){
                 SPEC_2.printedMaxCapacity(salle);
                 waitForMenu();
         }
-    }
-    )
+    })
+}
+
+// SPEC 3 - Affiche les horaires libres pour une salle
+/** 
+ * Demande une salle à l'utilisateur, puis appelle la fonction findFreeSlotsByRoom de la SPEC-3 
+ * pour la salle donnée.
+ *
+ * @returns {void} Cette fonction ne retourne rien
+ */
+function DisponibiliteSalle() {
+    console.log("\nVous avez choisi l'option 'Recherche des créneaux pour une salle'");
+    console.log("Quel est la salle dont vous recherchez les créneaux ?");
+    console.log("0 - Quitter");
+    rl.question('Votre choix : ', (choice) => {
+        switch (choice) {
+            case '0':
+                console.log("\\nVous avez choisi l'option 'Quitter'");
+                askSearchMenu();
+                return;
+            default:
+                console.log(`Vous avez choisi de rechercher les créneaux pour la salle : ${choice}`);
+                SPEC_3.findFreeSlotsByRoom(choice);
+                rl.close();
+        }
+    });
+}
+
+//SPEC 4 - affiche les salles libres à un créneau donné
+/**
+ * Demande un créneaux à l utilisateur, puis appelle la fonction findFreeRoom de la SPEC-4
+ * afin d afficher les salles qui sont libres pendant ce créneau
+ *
+ * @returns {void} Cette fonction ne retourne rien
+ */
+function CreneauLibreSalle() {
+    console.log("\nRecherche des salles libres à un créneau");
+    console.log("0 - Retour au menu précédent");
+    rl.question('Entrez le jour (ex: L/MA/ME/J/V/S) : ', (jour) => {
+        if (jour === '0') {
+            askSearchMenu();
+            return;
+        }
+    
+        rl.question("Entrez l'heure de début (HH:MM) : ", (heureDebut) => {
+            if (heureDebut === '0') {
+                askSearchMenu();
+                return;
+            }
+    
+            rl.question("Entrez l'heure de fin (HH:MM) : ", (heureFin) => {
+                if (heureFin === '0') {
+                    askSearchMenu();
+                    return;
+                }
+                SPEC_4.findFreeRooms(jour, heureDebut, heureFin);
+    
+                rl.close();
+            });
+        });
+    });
+}
+
+//SPEC 5 non réalisé après discussion avec l'autre groupe
+
+//SPEC 6 - génération fichier ICalendar
+//appel fait dans le menu
+
+//SPEC 7 - Affiche les salles et les créneaux où il y a chevauchement
+/**
+ * Appelle la fonction checkOverLaps de la SPEC-7, qui vérifie le non-chevauchement 
+ * des cours et les affiche s'il y en a.
+ *
+ * @returns {void} Cette fonction ne retourne rien
+ */
+function Chevauchement() {
+    console.log("\nVérification du non-chevauchement des cours");
+    SPEC_7.checkOverlaps(data);
+    rl.close();
 }
 
 // SPEC 8 - Afficher un classement par capacité des salles données
