@@ -14,6 +14,7 @@ data = DataMain.structuredData
  * @returns {void} Cette fonction ne retourne rien, mais affiche la capacité maximale de la salle donnée
  */
 function printedMaxCapacity(salle) {
+    salle=salle.toUpperCase(); // Met en majuscule
     if (!verifSalle(salle)){
         console.log("Erreur : la salle n'existe pas dans la base de données.");
         return;
