@@ -125,8 +125,12 @@ function organizeTokens(tokens) {
                     currentCourse.push(parseInt(token.split("=")[1])); // "P=50" -> 50 (int)
                 } else if (/^H=(L|MA|ME|J|V|S)$/.test(token)) {
                     currentCourse.push(token.split("=")[1]); // "H=MA" -> "MA"
-                } else if (/^S=[A-Z]{1,3}\d{1,3}$/.test(token)) {
-                    currentCourse.push(token.split("=")[1]); // "S=LAB102" -> "LAB102"
+                } else if (/^S=(?:SPOR|[A-Z]{1,3}\d{1,3})?$/.test(token)) {
+                    if (token == 'S=') {
+                        currentCourse.push('Aucune salle précisée')
+                    }else{
+                        currentCourse.push(token.split("=")[1]); // "S=LAB102" -> "LAB102"
+                    }
                 } else if (/^(\d|1\d|2[0-3]):[0-5]\d-(\d|1\d|2[0-3]):[0-5][0-9]$/.test(token)) {
                     const [start, end] = token.split("-"); // "08:00-09:30" -> ["08:00", "09:30"]
                     currentCourse.push(start, end);

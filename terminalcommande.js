@@ -78,7 +78,7 @@ function handleMainMenu(choice) {
             VisuelOccupationSalle(); //SPEC 9
             return;
         case '3':
-            SPEC_6.generatePersonalSchedule(); //SPEC 6
+            generatePersonalSchedule(); //SPEC 6
             waitForMenu();
             return;
         case '4':
@@ -93,6 +93,7 @@ function handleMainMenu(choice) {
             return;
         default:
             console.log('Option invalide. Veuillez choisir un nombre entre 0 et 5.');
+            askMainMenu();
     }
 }
 
@@ -122,7 +123,7 @@ function handleSearchMenu(choice) {
             return;
         default:
             console.log('Option invalide. Veuillez choisir un nombre entre 0 et 4.');
-            handleSearchMenu();
+            askSearchMenu();
     }
 }
 
@@ -279,7 +280,104 @@ function CreneauLibreSalle() {
 //SPEC 5 non réalisé après discussion avec l'autre groupe
 
 //SPEC 6 - génération fichier ICalendar
-//appel fait dans le menu
+/**
+ * Lance le processus de génération d'un emploi du temps personnalisé au format iCalendar.
+ * 
+ * Cette fonction affiche un message d'accueil et appelle la fonction `askForCourses` pour que l'utilisateur choisisse les cours qu'il souhaite inclure dans son emploi du temps.
+ *
+ * @returns {void} Cette fonction n'a pas de valeur de retour, elle déclenche l'interaction avec l'utilisateur pour sélectionner les cours.
+ */
+function generatePersonalSchedule() {
+    console.log("Bienvenue dans l'outil de génération de fichier ICalendar");
+    dict_courses_selected={};
+    askForCourses(dict_courses_selected);
+    waitForMenu();
+}
+
+/**
+ * Demande à l'utilisateur de sélectionner des cours pour son emploi du temps personnalisé.
+ * 
+ * Cette fonction gère l'interaction avec l'utilisateur pour permettre la sélection de cours.
+ * Elle utilise un menu où l'utilisateur peut entrer le nom des cours, terminer la sélection ou quitter.
+ * Lorsqu'un cours valide est sélectionné, il est ajouté à la liste des cours, et une fois la sélection terminée, 
+ * elle appelle la fonction `askForGroups` pour que l'utilisateur choisisse les groupes associés aux cours.
+ *
+ * @returns {void} Cette fonction n'a pas de valeur de retour. Elle interagit avec l'utilisateur pour sélectionner des cours.
+ */
+function askForCourses(dict_courses_selected) {
+    function ask() {
+        rl.question("Donnez le nom d'un cours ('0' pour quitter, '1' pour terminer la sélection): ", (input) => {
+            switch (input) {
+                case '0':
+                    console.log("Vous avez choisi de quitter");
+                    askMainMenu();
+                    return;
+                case '1':
+                    if (Object.keys(dict_courses_selected).length > 0) {
+                        console.log('Fin du choix des matières.');
+                        SPEC_6.generateICalendar(dict_courses_selected);
+                        waitForMenu();
+                        return
+                    } else {
+                        console.log('Pas de cours choisis, veuillez réessayer');
+                        askForCourses(dict_courses_selected);
+                    }
+                    return;
+                default:
+                    if (SPEC_6.findCourse(input)) {
+                        console.log(`Cours ajouté: ${input}`);
+                        dict_courses_selected[input]= [];
+                        dict_courses_selected = askForGroups(input, dict_courses_selected);
+                    } else {
+                        console.log('Cours pas trouvé. Veuillez réessayer.');
+                    }
+
+                    ask(); //répéter pour le prochain cours
+            }
+        });
+    };
+
+    ask(); // Start the loop
+}
+
+/**
+ * Demande à l'utilisateur de choisir un groupe pour chaque cours dans la liste donnée et génère un fichier iCalendar avec les cours sélectionnés.
+ *
+ * Cette fonction parcourt chaque cours dans la liste `list_courses`, demande à l'utilisateur de spécifier un groupe pour chaque cours, et ajoute le groupe sélectionné à un dictionnaire `dict_courses_selected`. Lorsque l'utilisateur termine la sélection, un fichier iCalendar est généré avec les informations des cours et groupes choisis.
+ *
+ * @function askForGroups
+ * @param {} course 
+ * @param {} dict_courses_selected - Liste des cours pour lesquels l'utilisateur doit choisir un groupe.
+ * @returns {} Cette fonction ne retourne rien, mais lance un processus interactif pour sélectionner les groupes et générer le fichier iCalendar.
+ */
+function askForGroups(course, dict_courses_selected) {
+    SPEC_6.PrintGroupsAvailable(course);
+    rl.question(`Donnez le nom de vos groupes de cours pour ${course} ('0' pour quitter, '1' pour terminer la sélection): `, (input) => {
+        switch (input) {
+            case '0':
+                console.log("Vous avez choisi de quitter");
+                askMainMenu();
+                return;
+            case '1':
+                if (dict_courses_selected[course]== []) {
+                    console.log('Pas de groupes choisis. Veuillez réessayer.');
+                } else {
+                    askForCourses(dict_courses_selected);
+                    return;
+                }
+            default:
+                if (SPEC_6.findGroup(course, input)) {
+                    console.log(`Groupe ajouté: ${input}`);
+                    dict_courses_selected[course].push(SPEC_6.findGroupModule(course, input));
+                    dict_courses_selected = askForGroups(course, dict_courses_selected);
+                } else {
+                    console.log('Groupe pas trouvé. Veuillez réessayer.');
+                    dict_courses_selected = askForGroups(course, dict_courses_selected);
+                }
+        }
+    });
+}
+
 
 //SPEC 7 - Affiche les salles et les créneaux où il y a chevauchement
 /**
