@@ -34,7 +34,7 @@ Installez Vega et Vegalite pour la visualisation :
 
 ```bash
 bash
-npm install vega vega-lite vega-embed
+npm install vega vega-lite
 
 ```
 
