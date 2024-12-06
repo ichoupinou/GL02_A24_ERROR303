@@ -406,6 +406,7 @@ function RankingRoomCapacity(){
     const listSalles = [];
     function ask() {
         rl.question("Entrez les salles que vous souhaitez ajouter au classement ((ou '1' pour terminer, '0' pour sortir) : ", (input) => {
+            input=input.toUpperCase(); // Met en majuscule
             switch (input) {
                 case '0':
                     console.log("Vous avez choisi de quitter");
@@ -422,7 +423,7 @@ function RankingRoomCapacity(){
                     }
                     break;
                 default:
-                    if (SPEC_2.verifSalle(input) == true) {
+                    if (SPEC_2.verifSalle(data, input) == true) {
                         console.log(`Salle ajoutée: ${input}`);
                         listSalles.push(input);
                     } else {
