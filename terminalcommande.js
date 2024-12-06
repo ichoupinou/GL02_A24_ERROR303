@@ -90,7 +90,13 @@ function handleMainMenu(choice) {
     }
 }
 
-// Gérer les choix dans le menu recherche
+/**
+ * Gère la sélection du menu recherche en fonction du choix de l'utilisateur.
+ *
+ * @function handleSearchMenu
+ * @param {string} choice - Le choix de l'utilisateur sous forme de chaîne de caractères.
+ * @returns {void} Pas de valeur de retour à part un print à l'user.
+ */
 function handleSearchMenu(choice) {
     switch (choice) {
         case '1':
@@ -115,9 +121,12 @@ function handleSearchMenu(choice) {
 }
 
 // --------------------------------------------------------------
-// Demande des commandes
-
-// Demander une commande dans le menu principal
+/**
+ * Affiche le menu principal et gère l'interaction avec l'utilisateur.
+ *
+ * @function askMainMenu
+ * @returns {void} Pas de valeur de retour.
+ */
 function askMainMenu() {
     displayMainMenu();
     rl.question('Votre choix : ', (choice) => {
