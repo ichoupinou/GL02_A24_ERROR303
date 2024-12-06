@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "jasmin": "^0.0.2",
+    "vega": "^5.30.0",
+    "vega-lite": "^5.22.0"
+  },
+  "devDependencies": {
+    "jasmine": "^5.5.0"
+  },
+  "scripts": {
+    "test": "jasmine"
+  }
+}
