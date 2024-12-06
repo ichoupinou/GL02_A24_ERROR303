@@ -79,7 +79,8 @@ function handleMainMenu(choice) {
             return;
         case '3':
             SPEC_6.generatePersonalSchedule(); //SPEC 6
-            break;
+            waitForMenu();
+            return;
         case '4':
             Chevauchement(); //SPEC 7 
             return;
