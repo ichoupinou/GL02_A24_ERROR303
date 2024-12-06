@@ -50,13 +50,22 @@ function findFreeSlotsByRoom(specificRoom) {
 
         return freeSlots;
     }
-
     // Affichage des créneaux libres pour chaque jour
-    console.log(`Créneaux libres pour la salle : ${specificRoom}`);
-    ['L', 'MA', 'ME', 'J', 'V', 'S'].forEach(day => {
-        console.log(`  Jour: ${day}`);
 
-        const dayClasses = daySchedule[day] || [];
+    const dayChanging = {
+        L: "Lundi",
+        MA: "Mardi",
+        ME: "Mercredi",
+        J: "Jeudi",
+        V: "Vendredi",
+        S: "Samedi"
+    };
+
+    console.log(`Créneaux libres pour la salle : ${specificRoom}`);
+    Object.keys(dayChanging).forEach(dayKey => {
+        const dayName = dayChanging[dayKey];
+        console.log(`  Jour: ${dayName}`);
+        const dayClasses = daySchedule[dayKey] || [];
         if (dayClasses.length === 0) {
             console.log(`    Toute la journée est libre: 08:00 - 20:00`);
         } else {
