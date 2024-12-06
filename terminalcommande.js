@@ -1,15 +1,24 @@
 const readline = require('readline');
 const fs = require('fs');
-
 const DataMain = require('./main.js');
-data = DataMain.structuredData  
+data = DataMain.structuredData
 
-module.exports={askMainMenu, askSearchMenu, displayMainMenu, displaySearchMenu, handleMainMenu, handleSearchMenu, findGroup, findCourse};
+module.exports={askMainMenu};
 
+//Importation des fonctions des SPEC 2, 8 et 9 - SPEC de Anaelle
+const SPEC_2 = require('./SPEC-2.js');  //SPEC 2 - afficher la capacité lax d'une salle donnée
+const SPEC_6 = require('./SPEC-6.js');  //SPEC 6 - generation du fichier ICalendar
+const SPEC_8 = require('./SPEC-8.js');  //SPEC 8 - affichage du classement des salles par capacité
+const SPEC_9 = require('./SPEC-9.js');  //SPEC 9 - visuel du taux d'occupation de chaque salle
+
+// Création d'une interface pour lire et écrire dans la console
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
+
+// -------------------------------------------------------------------------------
+// Affichage des menus
 
 /**
  * Affiche le menu principal dans la console pour l'outil de gestion et suivi d'occupation des salles de cours.
@@ -22,11 +31,10 @@ function displayMainMenu() {
     console.log('Menu Principal');
     console.log('Choisissez une option :');
     console.log('1 - Faire une recherche');
-    console.log('2 - Générer un EDT au format CRU'); // pas censé être fait mdr, pas dans le sujet de base 
+    console.log("2 - Visuel taux d'occupation de chaque salle");
     console.log('3 - Générer son EDT en ICalendar');
     console.log('4 - Vérifier le non-chevauchement');
     console.log("5 - Classement des salles en fonction de leur capacité d'accueil");
-    console.log("6 - Visuel taux d'occupation de chaque salle");
     console.log('0 - Quitter');
 }
 
@@ -46,6 +54,9 @@ function displaySearchMenu() {
     console.log('0 - Quitter');
 }
 
+// --------------------------------------------------------------
+// Gérer les choix
+
 /**
  * Gère la sélection du menu principal en fonction du choix de l'utilisateur.
  *
@@ -56,29 +67,26 @@ function displaySearchMenu() {
 function handleMainMenu(choice) {
     switch (choice) {
         case '1':
-            askSearchMenu(); // Aller au sous-menu de recherche
+            askSearchMenu(); // Aller au sous-menu
             return;
         case '2':
-            EDTCRU();
+            VisuelOccupationSalle();
             return;
         case '3':
-            generatePersonalSchedule();
+            SPEC_6.generatePersonalSchedule();
             break;
         case '4':
             Chevauchement();
             return;
         case '5':
-            ClassementCapaciteSalle();
-            return;
-        case '6':
-            VisuelOccupationSalle();
+            RankingRoomCapacity();
             return;
         case '0':
             console.log('Au revoir !');
             rl.close(); // Fermer l'interface de lecture
             return;
         default:
-            console.log('Option invalide. Veuillez choisir un nombre entre 0 et 6.');
+            console.log('Option invalide. Veuillez choisir un nombre entre 0 et 5.');
     }
 }
 
@@ -95,7 +103,7 @@ function handleSearchMenu(choice) {
             SalleCours();
             return;
         case '2':
-            CapaciteSalle();
+            RoomCapacity();
             return;
         case '3':
             DisponibiliteSalle();
@@ -108,9 +116,11 @@ function handleSearchMenu(choice) {
             return;
         default:
             console.log('Option invalide. Veuillez choisir un nombre entre 0 et 4.');
+            handleSearchMenu();
     }
 }
 
+// --------------------------------------------------------------
 /**
  * Affiche le menu principal et gère l'interaction avec l'utilisateur.
  *
@@ -121,9 +131,9 @@ function askMainMenu() {
     displayMainMenu();
     rl.question('Votre choix : ', (choice) => {
         try {
-            handleMainMenu(choice);
+            handleMainMenu(choice); // gère les choix de l'utilisateur
         } catch (error) {
-            console.error('An error occurred: ', error.message);
+            console.error('Une erreur est arrivée: ', error.message);
             askMainMenu(); // on redemande si erreur
         }
     });
@@ -142,37 +152,147 @@ function askSearchMenu() {
             handleSearchMenu(choice);
         } catch (error) {
             console.error('An error occurred: ', error.message);
-            askSearchMenu();  // on redemande si erreur
+            askSearchMenu(); // on redemande si erreur
         }
     });
 }
 
-//fonctions générales qui peuvent être utilisé dans plusieurs SPEC
+// --------------------------------------------------------------------------------
+// 
 
-
+// SPEC 2 - Afficher la capacité maximum d'une salle
 /**
- * Vérifie si un cours correspondant au code donné existe dans les données.
+ * Demande une salle à l'utilisateur, vérifie qu'elle existe dans la base de données
+ * et ensuite affiche sa capacité maximale.
  *
- * @function findCourse
- * @param {string} courseCode - Le code du cours à rechercher.
- * @returns {boolean} `true` si un module correspondant est trouvé, sinon `false`.
+ * @returns {void} Cette fonction ne retourne rien 
  */
-function findCourse(courseCode) {
-    return data.some(module => module.module === courseCode);
+function RoomCapacity(){
+    console.log("\nVous avez choisi l'option 'Trouver la capacité max d'une salle'");
+    console.log("Quel est la salle dont vous recherchez la capacité ?");
+    console.log("0 - Quitter");
+    rl.question('Votre choix : ', (salle) => {
+        switch (salle) {
+            case '0':
+                console.log("\nVous avez choisi l'option 'Quitter'");
+                askSearchMenu();
+                return; 
+            default:
+                console.log(`Vous avez choisi de rechercher la capacité de la salle : ${salle}`);
+                SPEC_2.printedMaxCapacity(salle);
+                waitForMenu();
+        }
+    }
+    )
+}
+
+// SPEC 8 - Afficher un classement par capacité des salles données
+/**
+ * Demande plusisurs salles à l'utilisateur, vérifie qu'elles existe dans la base de données
+ * et ensuite appelle une fonction qui génère un classement des salles données par capacité maximale.
+ *
+ * @returns {void} Cette fonction ne retourne rien 
+ */
+function RankingRoomCapacity(){
+    console.log("\nVous avez choisi l'option 'Classement des salles en fonction de leur capacité d'accueil'");
+    console.log("0 - Quitter");
+    printRooms();
+    const listSalles = [];
+    function ask() {
+        rl.question("Entrez les salles que vous souhaitez ajouter au classement ((ou '1' pour terminer, '0' pour sortir) : ", (input) => {
+            switch (input) {
+                case '0':
+                    console.log("Vous avez choisi de quitter");
+                    askMainMenu();
+                    return;
+                case '1':
+                    if (listSalles.length > 0) {
+                        console.log('Géneration du classement des salles sélectionnées...');
+                        SPEC_8.classementSalles(listSalles);
+                        askMainMenu();
+                        return
+                    } else {
+                        console.log('Pas de groupes choisis, veuillez réessayer');
+                    }
+                    break;
+                default:
+                    if (SPEC_2.verifSalle(input) == true) {
+                        console.log(`Salle ajoutée: ${input}`);
+                        listSalles.push(input);
+                    } else {
+                        console.log("Erreur : la salle n'existe pas dans la base de données.");
+                    }
+
+                    ask(); //répéter pour la prochaine salle
+            }
+        });
+    };
+    ask();
+}
+
+// SPEC 9 - Visualiser le taux d'occupation d'une salle
+/**
+ * Demande une salle à l'utilisateur, vérifie qu'elle existe dans la base de données
+ * et ensuite appelle une fonction qui génère une visualisation du taux d'occupation de la salle.
+ *
+ * @returns {void} Cette fonction ne retourne rien 
+ */
+function VisuelOccupationSalle() {
+    console.log("\nVous avez choisi l'option 'Visuel taux d'occupation d'une salle'");
+    console.log("Quel est la salle dont vous recherchez le taux d'occupation dans la semaine ?");
+    console.log("0 - Quitter");
+    printRooms();
+    rl.question('Votre choix : ', (choice) => {
+        switch (choice) {
+            case '0':
+                console.log("\nVous avez choisi l'option 'Quitter'");
+                askMainMenu();
+                return; 
+            default:
+                if (SPEC_2.verifSalle(choice) == true) {
+                    console.log(`Vous avez choisi de voir le taux d'occupation de la salle : ${choice}`);
+                    SPEC_9.visualiserOccupationJour(choice);
+                    waitForMenu();
+                    return;
+                } else {
+                    console.log("Erreur : la salle n'existe pas dans la base de données, recommencez.");
+                    VisuelOccupationSalle();
+                }
+        }
+    });
 }
 
 /**
- * Vérifie si un groupe spécifique existe dans les données.
- * 
- * Cette fonction recherche un groupe donné (par son code) dans les modules. Elle retourne `true` si le groupe est trouvé, sinon elle retourne `false`.
+ * Affichage de l'ensemble des salles présentes dans la base de données
  *
- * @param {string} groupCode - Le code du groupe à rechercher.
- * @returns {boolean} Retourne `true` si le groupe existe, sinon `false`.
+ * @returns {void} Cette fonction ne retourne rien 
  */
-function findGroup(groupCode) {
-    return data.some(module => 
-        module.classes.some(classGroup => classGroup.group === groupCode)
-    );
+function printRooms(){
+    const listSalles = [];
+    console.log("L'ensemble des salles disponibles est : ");
+    for (const course of data) {
+        for (const classEntry of course.classes) {
+            if (!listSalles.includes(classEntry.room)) {
+                console.log("Salle " + classEntry.room)
+                listSalles.push(classEntry.room);
+            }
+        }
+    }
 }
 
 
+/**
+ * Fonction qui attend que l'utilisateur fasse "Entrée" pour afficher le menu
+ *
+ * @returns {void} Cette fonction ne retourne rien
+ */
+function waitForMenu(){
+    rl.question('Faites "Entrée" pour passer à la suite : ', (anything) => {
+        switch (anything) {
+            default:
+                askMainMenu();
+                return;
+        }
+    }
+    )
+}

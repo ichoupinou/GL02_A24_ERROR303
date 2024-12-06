@@ -4,30 +4,45 @@ const path = require('path');
 const file = path.resolve(__dirname, 'sample/edttotal_clean.cru');
 let structuredData = null;
 
+// Suppression du warning Punycode causé par la SPEC-9
+const originalEmitWarning = process.emitWarning;
+    process.emitWarning = function(warning, ...args) {
+        if (typeof warning === 'string' && warning.includes('punycode')) return;
+        return originalEmitWarning(warning, ...args);
+    };
+
+// Lecture du fichier
 fs.readFile(file, 'utf8', async (err, data) => {
     if (err) {
         console.error("Erreur lors de la lecture du fichier :", err);
         return;
     }
 
+    // Créer une nouvelle instance de Parser
     const parser = new Parser();
 
     try {
+        // Parse et récupère les tokens structurés
         console.log("Validation et tokenisation en cours...");
         const tokens = await parser.parseAndTokenize(data);
 
         if (tokens) {
             console.log(`Le fichier ${file} est conforme au format CRU.`);
 
-            structuredData = organizeTokens(tokens);
+            // Organisation des données
+            structuredData = organizeTokensbis(tokens);
             
+            // Export the structured data
             module.exports = { structuredData };
             
-            console.log("Structured Data: ");
-            console.log(JSON.stringify(structuredData, null, 2));
+            //console.log("Structured Data: ");
+            //console.log(JSON.stringify(structuredData, null, 2));
 
+            // Lancer l'application APRES le traitement du fichier
             const Menu = require('./terminalcommande.js');
+            //Menu.mainTest();
             Menu.askMainMenu();
+
         } else {
             console.log(`Le fichier ${file} n'est pas conforme au format CRU.`);
         }
