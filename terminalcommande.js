@@ -210,7 +210,7 @@ function RoomCapacity(){
                 return; 
             default:
                 console.log(`Vous avez choisi de rechercher la capacité de la salle : ${salle}`);
-                SPEC_2.printedMaxCapacity(salle);
+                SPEC_2.printedMaxCapacity(data, salle);
                 waitForMenu();
         }
     })
@@ -326,7 +326,7 @@ function RankingRoomCapacity(){
                     }
                     break;
                 default:
-                    if (SPEC_2.verifSalle(input) == true) {
+                    if (SPEC_2.verifSalle(data, input) == true) {
                         console.log(`Salle ajoutée: ${input}`);
                         listSalles.push(input);
                     } else {
@@ -360,7 +360,7 @@ function VisuelOccupationSalle() {
                 askMainMenu();
                 return; 
             default:
-                if (SPEC_2.verifSalle(choice) == true) {
+                if (SPEC_2.verifSalle(data, choice) == true) {
                     console.log(`Vous avez choisi de voir le taux d'occupation de la salle : ${choice}`);
                     SPEC_9.visualiserOccupationJour(choice);
                     waitForMenu();
