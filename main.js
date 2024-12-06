@@ -30,7 +30,7 @@ fs.readFile(file, 'utf8', async (err, data) => {
             console.log(`Le fichier ${file} est conforme au format CRU.`);
 
             // Organisation des données
-            structuredData = organizeTokensbis(tokens);
+            structuredData = organizeTokens(tokens);
             
             // Export the structured data
             module.exports = { structuredData };
